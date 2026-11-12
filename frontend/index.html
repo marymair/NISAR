@@ -1,1 +1,237 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZORI · Earth Dance Observatory — NASA Space Apps 2026</title>
+<meta name="description" content="An alien field mission that reads Earth's changing surface with NISAR radar data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;800&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css">
+<link rel="stylesheet" href="style.css">
+<script>
+  /* apply saved theme before first paint (no flash) */
+  try {
+    var th = localStorage.getItem('zori.theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    document.documentElement.dataset.theme = th;
+  } catch (e) {}
+</script>
+</head>
+<body data-screen="intro">
 
+<!-- ===== reusable SVG: ZORI the alien (colors follow the current accent) ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="zshine" cx="35%" cy="25%" r="70%">
+      <stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <symbol id="zori" viewBox="0 0 120 150">
+    <g stroke="var(--accent)" stroke-width="3" stroke-linecap="round" fill="none"><path d="M44 30 L32 8"/><path d="M76 30 L88 8"/></g>
+    <circle cx="32" cy="8" r="5" fill="var(--accent-2)"/><circle cx="88" cy="8" r="5" fill="var(--accent-2)"/>
+    <path d="M30 122 Q60 100 90 122 L96 148 L24 148Z" fill="var(--accent)" opacity=".55"/>
+    <ellipse cx="60" cy="72" rx="46" ry="48" fill="var(--accent)"/>
+    <ellipse cx="60" cy="72" rx="46" ry="48" fill="url(#zshine)"/>
+    <ellipse cx="40" cy="74" rx="12" ry="18" transform="rotate(-20 40 74)" fill="#070816">
+      <animate attributeName="ry" values="18;18;2;18;18" keyTimes="0;.9;.93;.96;1" dur="5s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="80" cy="74" rx="12" ry="18" transform="rotate(20 80 74)" fill="#070816">
+      <animate attributeName="ry" values="18;18;2;18;18" keyTimes="0;.9;.93;.96;1" dur="5s" repeatCount="indefinite"/>
+    </ellipse>
+    <circle cx="36" cy="66" r="3.5" fill="#fff"/><circle cx="76" cy="66" r="3.5" fill="#fff"/>
+    <path d="M50 102 Q60 110 70 102" stroke="#070816" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<!-- ===== top bar ===== -->
+<header class="topbar">
+  <button class="brand" id="brand" aria-label="ZORI home">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="9" fill="var(--accent)"/><ellipse cx="20" cy="20" rx="18" ry="6" fill="none" stroke="var(--accent-2)" stroke-width="2" transform="rotate(-25 20 20)"/><circle cx="34" cy="13" r="2.5" fill="var(--accent-2)"/></svg>
+    <div><b>ZORI</b><span data-i18n="brand.tag">Earth Dance Observatory</span></div>
+  </button>
+
+  <nav class="nav" aria-label="Main">
+    <button data-view="mission" data-i18n="nav.mission">Mission Control</button>
+    <button data-view="cases" data-i18n="nav.cases">Case Studies</button>
+    <button data-view="lab" data-i18n="nav.lab">Science Lab</button>
+  </nav>
+
+  <div class="controls">
+    <button class="icon-btn" id="lang-btn" aria-haspopup="true" aria-expanded="false" aria-label="Language">🌐 <span id="lang-current">EN</span></button>
+    <div class="menu" id="lang-menu" role="menu" hidden>
+      <button role="menuitemradio" data-lang="en" aria-checked="true">English</button>
+      <button role="menuitemradio" data-lang="ru" aria-checked="false">Русский</button>
+      <button role="menuitemradio" data-lang="es" aria-checked="false">Español</button>
+      <button role="menuitemradio" data-lang="fr" aria-checked="false">Français</button>
+      <button disabled aria-disabled="true">👽 ALIEN <span class="badge" data-i18n="lang.soon">Coming soon</span></button>
+    </div>
+    <button class="icon-btn" id="theme-toggle" aria-label="Toggle dark / light theme" aria-pressed="false">◐</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ================= SCREEN 1: INTRO ================= -->
+<section id="intro" class="screen">
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <p class="transmit" data-i18n="intro.eyebrow">Incoming transmission from Earth orbit</p>
+        <h1 data-i18n="intro.title">We found a planet that never stops dancing</h1>
+        <p class="lead" data-i18n="intro.lead">Aliens have spotted Earth.</p>
+        <div class="cta-row">
+          <button class="btn primary big" id="begin" data-i18n="intro.begin">Begin mission</button>
+          <a class="btn big" href="#how" data-i18n="intro.how" style="text-decoration:none;color:inherit">How it works</a>
+        </div>
+      </div>
+      <div class="hero-side">
+        <svg class="zori-big" viewBox="0 0 120 150" role="img" aria-label="ZORI, the alien guide"><use href="#zori"/></svg>
+        <div class="card signal">
+          <h3 data-i18n="signal.title">Earth Signal of the Day</h3>
+          <div class="date" id="signal-date"></div>
+          <p id="signal-text" style="margin:8px 0 0"></p>
+        </div>
+      </div>
+    </div>
+
+    <section class="block" id="how">
+      <div class="grid3">
+        <div class="card feature"><span class="ico">🛰️</span><h3 data-i18n="intro.f1.t"></h3><p data-i18n="intro.f1.d"></p></div>
+        <div class="card feature"><span class="ico">📡</span><h3 data-i18n="intro.f2.t"></h3><p data-i18n="intro.f2.d"></p></div>
+        <div class="card feature"><span class="ico">🌍</span><h3 data-i18n="intro.f3.t"></h3><p data-i18n="intro.f3.d"></p></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2 data-i18n="intro.steps.title">How the mission works</h2>
+      <div class="grid3 steps">
+        <div class="card"><h3 data-i18n="intro.s1.t"></h3><p data-i18n="intro.s1.d"></p></div>
+        <div class="card"><h3 data-i18n="intro.s2.t"></h3><p data-i18n="intro.s2.d"></p></div>
+        <div class="card"><h3 data-i18n="intro.s3.t"></h3><p data-i18n="intro.s3.d"></p></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2 data-i18n="intro.examples">Real examples</h2>
+      <div class="grid3" id="intro-cases"></div>
+      <div class="cta-row" style="justify-content:center;margin-top:34px">
+        <button class="btn primary big" data-start="mission" data-i18n="intro.begin">Begin mission</button>
+      </div>
+    </section>
+
+    <div class="foot" data-i18n="foot"></div>
+  </div>
+</section>
+
+<!-- ================= SCREEN 2: APP ================= -->
+<section id="app" class="screen" hidden>
+
+  <!-- Mission Control -->
+  <div class="view" id="view-mission">
+    <div class="wrap">
+      <h1 data-i18n="m.title">Mission Control</h1>
+      <p class="sub" data-i18n="m.sub"></p>
+
+      <div class="step-label" data-i18n="m.step1">1 · Choose a change</div>
+      <div class="changes" role="group" aria-label="Type of change">
+        <button class="change-card" data-change="flood" aria-pressed="false"><b>🌊 <span data-i18n="ch.flood.name"></span></b><small data-i18n="ch.flood.tag"></small></button>
+        <button class="change-card" data-change="forest" aria-pressed="false"><b>🌿 <span data-i18n="ch.forest.name"></span></b><small data-i18n="ch.forest.tag"></small></button>
+        <button class="change-card" data-change="ground" aria-pressed="false"><b>🌋 <span data-i18n="ch.ground.name"></span></b><small data-i18n="ch.ground.tag"></small></button>
+      </div>
+
+      <div class="step-label" data-i18n="m.step2">2 · Choose a place</div>
+      <div class="map-wrap" id="map-wrap">
+        <div id="map"></div>
+        <div class="map-tools">
+          <form id="search-form" role="search">
+            <input id="search" type="search" data-i18n-ph="m.search" placeholder="Search a place…" aria-label="Search a place">
+          </form>
+          <button class="icon-btn" id="btn-proj" type="button">🌍 <span data-i18n="m.flat">Flat map</span></button>
+          <button class="icon-btn" id="btn-sat" type="button" aria-pressed="false">🛰 <span data-i18n="m.sat">Satellite</span></button>
+        </div>
+        <div class="map-hint" data-i18n="m.hint"></div>
+        <div class="scanner" id="scanner" aria-hidden="true"><div class="sweep"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+        <div class="scan-msg" id="scan-msg" hidden data-i18n="scan.text"></div>
+      </div>
+
+      <div class="step-label" data-i18n="m.step3">3 · Analyze</div>
+      <div class="info-panel">
+        <div class="card">
+          <div class="k" data-i18n="p.place">Place</div>
+          <div class="v" id="p-name">—</div>
+          <div id="p-country" class="sub" style="margin:0">—</div>
+          <div class="k" style="margin-top:10px" data-i18n="p.coords">Coordinates</div>
+          <div class="v" id="p-coords" style="font-size:1.05rem">—</div>
+        </div>
+        <div class="card">
+          <div class="status" id="status" data-state="idle"><i></i><span id="status-text"></span></div>
+          <p class="sub" id="status-detail" style="margin:10px 0 0;font-size:.88rem"></p>
+        </div>
+        <div class="card actions">
+          <button class="btn primary" id="analyze" disabled data-i18n="a.btn">Analyze this place</button>
+          <p class="why" id="analyze-why"></p>
+          <button class="btn" id="copy" disabled data-i18n="a.copy">Copy link</button>
+        </div>
+      </div>
+
+      <article class="card" id="result" hidden></article>
+    </div>
+  </div>
+
+  <!-- Case Studies -->
+  <div class="view" id="view-cases" hidden>
+    <div class="wrap">
+      <h1 data-i18n="c.title">Case Studies</h1>
+      <p class="sub" data-i18n="c.sub"></p>
+      <div class="grid3" id="cases-grid" style="margin-top:20px"></div>
+    </div>
+  </div>
+
+  <!-- Science Lab -->
+  <div class="view" id="view-lab" hidden>
+    <div class="wrap">
+      <h1 data-i18n="l.title">Science Lab</h1>
+      <p class="sub" data-i18n="l.sub"></p>
+      <div style="margin-top:20px;max-width:860px">
+        <details open><summary data-i18n="l.sar.t"></summary><p data-i18n="l.sar.d"></p></details>
+        <details><summary data-i18n="l.back.t"></summary><p data-i18n="l.back.d"></p></details>
+        <details><summary data-i18n="l.pol.t"></summary><p data-i18n="l.pol.d"></p></details>
+        <details><summary data-i18n="l.insar.t"></summary><p data-i18n="l.insar.d"></p></details>
+        <details><summary data-i18n="l.prod.t"></summary><p data-i18n="l.prod.d"></p></details>
+        <details><summary data-i18n="l.trust.t"></summary><p data-i18n="l.trust.d"></p></details>
+      </div>
+      <div class="foot" data-i18n="foot"></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ===== Mission Briefing ===== -->
+<dialog id="briefing" aria-labelledby="b-title">
+  <h2 id="b-title" data-i18n="b.title">Mission Briefing</h2>
+  <dl>
+    <dt data-i18n="b.target">Target</dt><dd id="b-target"></dd>
+    <dt data-i18n="b.what">What we study</dt><dd id="b-what"></dd>
+    <dt data-i18n="b.how">How radar sees it</dt><dd id="b-how"></dd>
+  </dl>
+  <p class="note" data-i18n="b.note"></p>
+  <div class="dlg-actions">
+    <button class="btn" id="b-cancel" data-i18n="b.cancel">Cancel</button>
+    <button class="btn primary" id="b-go" data-i18n="b.go">Launch radar scan</button>
+  </div>
+</dialog>
+
+<!-- ===== ZORI helper (Alien Field Notes) ===== -->
+<aside id="zori" aria-live="polite">
+  <button class="face" id="zori-face" aria-label="ZORI"><svg viewBox="0 0 120 150" width="100%" height="100%"><use href="#zori"/></svg></button>
+  <div class="bubble"><span class="who" data-i18n="notes.title">Alien Field Notes</span><span id="zori-text"></span><button id="zori-close" aria-label="Close">×</button></div>
+</aside>
+
+<script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
+<script src="i18n.js"></script>
+<script src="samples.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
