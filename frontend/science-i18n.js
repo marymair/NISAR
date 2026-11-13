@@ -43,3 +43,20 @@ Object.assign(I18N.es, {
   'r.trustd': 'Priorizamos productos NISAR validados y evitamos mezclar madurez y geometrías incompatibles. La humedad, la estación y la geometría de adquisición también modifican la señal. Se requiere verificación.',
   'd.hint': 'Los productos NISAR validados están disponibles desde noviembre de 2026; las observaciones anteriores pueden ser provisionales.'
 });
+
+Object.assign(I18N.en, {
+ 'live.storylink': 'View original NASA study and imagery',
+ 'live.curated': 'Published NASA case study. This card is a documented reference; an on-demand analysis requires matching public NISAR science files.'
+});
+Object.assign(I18N.ru, {
+ 'live.storylink': 'Открыть исследование NASA и исходные изображения',
+ 'live.curated': 'Опубликованный пример NASA. Эта карточка — проверенный источник; для анализа по запросу нужны подходящие публичные научные файлы NISAR.'
+});
+Object.assign(I18N.fr, {
+ 'live.storylink': 'Voir les images et l’étude d’origine de la NASA',
+ 'live.curated': 'Étude de cas publiée par la NASA. Une analyse à la demande nécessite des données scientifiques NISAR compatibles.'
+});
+Object.assign(I18N.es, {
+ 'live.storylink': 'Ver el estudio y las imágenes originales de NASA',
+ 'live.curated': 'Estudio de caso publicado por NASA. El análisis a petición requiere datos científicos NISAR compatibles.'
+});
