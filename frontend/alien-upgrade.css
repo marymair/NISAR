@@ -61,3 +61,18 @@ html[data-theme="light"] #zori-widget .bubble{background:rgba(249,253,255,.96);c
 @media(max-width:900px){.lab-bg .console{width:42px;opacity:.25}.lab-bg .cpanel{padding:4px;gap:4px}.lab-bg .mini{gap:1px}}
 html[data-theme="light"] .lab-bg{opacity:.18}
 body[data-screen="intro"] #zori-widget{display:none}
+
+/* Mission science identity: flooded water cyan, forest/fire amber, Earth motion violet. */
+html[data-change="flood"]{--accent:#35d7f9;--accent-2:#168cf6}
+html[data-change="forest"]{--accent:#ff9a5b;--accent-2:#f86b55}
+html[data-change="ground"]{--accent:#ad8bff;--accent-2:#7164f8}
+html[data-theme="light"][data-change="flood"]{--accent:#067eaa;--accent-2:#2563eb}
+html[data-theme="light"][data-change="forest"]{--accent:#bb4515;--accent-2:#c2410c}
+html[data-theme="light"][data-change="ground"]{--accent:#6331b1;--accent-2:#6654ca}
+.change-card[data-change="flood"]{--c:#35d7f9}
+.change-card[data-change="forest"]{--c:#ff9a5b}
+.change-card[data-change="ground"]{--c:#ad8bff}
+#zori-widget .face:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+#zori-widget .bubble{max-height:min(240px,35vh);overflow-y:auto}
+.live-difference{margin:16px 0 2px}
+.live-difference figcaption{line-height:1.45}
