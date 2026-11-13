@@ -1,56 +1,59 @@
-/* ============ samples.js — ready-made "Explore a sample" cases ============
-   type:    'flood' | 'forest' | 'ground'
-   image:   one picture (put the file into the img/ folder)
-   before/after (optional): two pictures -> before/after slider with "difference" view
-   overlay (optional): { url:'img/flood_change.png', coordinates:[[lon,lat] TL, TR, BR, BL] }
-                       -> your own change map drawn on top of the globe (made by make_overlay.py)
-*/
+/* Verified NASA story cards. These are curated references, NOT locally computed results.
+ * Always cite NASA story URLs and avoid missing local images or invented metrics.
+ */
 const SAMPLES = [
   {
     id: 'venezuela', type: 'ground', lat: 10.55, lng: -66.9, zoom: 8,
-    image: 'img/venezuela.jpg',
-    credit: 'NASA Earth Observatory / Lauren Dauphin, from NISAR data (June 13 and 18 before, June 25 and 30 after the quakes)',
+    from: '2026-06-17', to: '2026-07-08',
+    sourceUrl: 'https://science.nasa.gov/earth/earth-observatory/where-venezuelas-earthquakes-shifted-the-ground/',
+    credit: 'NASA Earth Observatory / Lauren Dauphin; NISAR science team and Eric Fielding',
     title: {
-      en: 'Venezuela earthquakes, June 2026', ru: 'Землетрясения в Венесуэле, июнь 2026',
-      es: 'Terremotos en Venezuela, junio de 2026', fr: 'Séismes au Venezuela, juin 2026'
+      en: 'Venezuela — June 2026 earthquakes',
+      ru: 'Венесуэла — землетрясения июня 2026',
+      fr: 'Venezuela — séismes de juin 2026',
+      es: 'Venezuela — terremotos de junio de 2026'
     },
     text: {
-      en: 'Two earthquakes hit on June 24, 2026. Radar passes before and after were compared, and the colored fringes show how far the ground shifted, especially near Caracas and La Guaira.',
-      ru: '24 июня 2026 года произошли два землетрясения. Сравнили радарные пролёты до и после: цветные полосы показывают, насколько сдвинулась земля, особенно рядом с Каракасом и Ла-Гуайрой.',
-      es: 'Dos terremotos ocurrieron el 24 de junio de 2026. Se compararon pasadas de radar antes y después; las franjas de colores muestran cuánto se movió el suelo, sobre todo cerca de Caracas y La Guaira.',
-      fr: 'Deux séismes ont eu lieu le 24 juin 2026. Les passages radar avant et après ont été comparés ; les franges colorées montrent de combien le sol a bougé, surtout près de Caracas et de La Guaira.'
+      en: 'NASA published a NISAR ground-displacement map after the June 24 earthquakes. Acquisitions on June 13 and 18 preceded the earthquakes; June 25 and 30 followed them. This is a curated NASA example, not a new on-demand displacement estimate.',
+      ru: 'NASA опубликовало карту смещений после землетрясений 24 июня. Для неё использованы съёмки 13 и 18 июня до события, 25 и 30 июня — после. Это проверенный пример NASA, а не новая автоматическая оценка смещений.',
+      fr: 'NASA a publié une carte de déplacement après les séismes du 24 juin à partir des scènes des 13, 18, 25 et 30 juin. Il s’agit d’une étude de référence, pas d’une nouvelle estimation automatique.',
+      es: 'NASA publicó un mapa de desplazamiento después de los terremotos del 24 de junio utilizando escenas del 13, 18, 25 y 30 de junio. Es un estudio de referencia, no una nueva estimación automática.'
     }
   },
   {
-    id: 'southafrica', type: 'forest', lat: -27.0, lng: 27.0, zoom: 6.5,
-    image: 'img/southafrica.jpg',
-    credit: 'NASA Earthdata, false-color composite derived from NISAR data, 2025–2026 growing season',
+    id: 'maize', type: 'forest', lat: -28.5, lng: 27.0, zoom: 8,
+    from: '2025-11-22', to: '2026-03-10',
+    sourceUrl: 'https://science.nasa.gov/earth/earth-observatory/painting-the-growing-season-in-the-maize-triangle/',
+    credit: 'NASA Earth Observatory / Paul Siqueira (UMass Amherst), NISAR GCOV',
     title: {
-      en: 'A growing season in South Africa', ru: 'Сезон роста в Южной Африке',
-      es: 'Una temporada de cultivo en Sudáfrica', fr: 'Une saison de culture en Afrique du Sud'
+      en: 'South Africa — the Maize Triangle',
+      ru: 'ЮАР — «Кукурузный треугольник»',
+      fr: 'Afrique du Sud — Triangle du maïs',
+      es: 'Sudáfrica — Triángulo del maíz'
     },
     text: {
-      en: 'In this false-color composite, green marks vegetated areas, red marks unvegetated surfaces, and blue marks how fast vegetation changed during the season. Most pixels mix these colors.',
-      ru: 'На этом ложноцветном снимке зелёный показывает растительность, красный голую поверхность, а синий скорость изменения растительности за сезон. Большинство пикселей смешивают эти цвета.',
-      es: 'En este compuesto en falso color, el verde marca zonas con vegetación, el rojo superficies sin vegetación y el azul la rapidez con que cambió la vegetación en la temporada. La mayoría de los píxeles mezclan estos colores.',
-      fr: 'Dans ce composite en fausses couleurs, le vert marque les zones végétalisées, le rouge les surfaces nues et le bleu la rapidité de changement de la végétation durant la saison. La plupart des pixels mélangent ces couleurs.'
+      en: 'An official NASA GCOV multi-pass composite illustrates vegetation, bare soil and how fields evolved during the 2025–2026 growing season. A scientific reference case rather than a newly computed classification.',
+      ru: 'Официальный пример NASA: многовременной композит GCOV показывает растительность, открытые почвы и изменения полей в сезон 2025–2026. Это научный пример, а не автоматически построенная классификация.',
+      fr: 'Composite GCOV officiel de la NASA sur la végétation, les sols nus et les changements agricoles de la saison 2025–2026.',
+      es: 'Compuesto GCOV oficial de NASA sobre vegetación, suelo desnudo y cambios agrícolas durante la temporada 2025–2026.'
     }
   },
   {
-    /* REPLACE this one with YOUR flood case (see Step 7 of the guide). Until then it is a placeholder. */
-    id: 'flood', type: 'flood', lat: 24.9, lng: 89.6, zoom: 7,
-    image: 'img/flood.png',
-    /* overlay: { url: 'img/flood_change.png', coordinates: [[88.9,25.5],[90.3,25.5],[90.3,24.3],[88.9,24.3]] }, */
-    credit: 'Your analysis of NISAR GCOV data (ASF DAAC)',
+    id: 'mozambique', type: 'flood', lat: -24.5, lng: 33.2, zoom: 8,
+    from: '2025-12-25', to: '2026-02-01',
+    sourceUrl: 'https://svs.gsfc.nasa.gov/5661/',
+    credit: 'NASA Scientific Visualization Studio / Zoey N. Armstrong; NISAR GCOV',
     title: {
-      en: 'Your flood case (replace me)', ru: 'Твой пример наводнения (замени меня)',
-      es: 'Tu caso de inundación (reemplázame)', fr: 'Ton cas d’inondation (remplace-moi)'
+      en: 'Mozambique — January 2026 floods',
+      ru: 'Мозамбик — наводнения января 2026',
+      fr: 'Mozambique — inondations de janvier 2026',
+      es: 'Mozambique — inundaciones de enero de 2026'
     },
     text: {
-      en: 'Replace this text with the real event you analyzed: where it happened, which two dates you compared and what the dark and bright patches mean.',
-      ru: 'Замени этот текст описанием реального события: где это было, какие две даты ты сравнила и что означают тёмные и яркие пятна.',
-      es: 'Reemplaza este texto con el evento real que analizaste: dónde ocurrió, qué dos fechas comparaste y qué significan las manchas oscuras y brillantes.',
-      fr: 'Remplace ce texte par l’événement réel que tu as analysé : où il a eu lieu, quelles deux dates tu as comparées et ce que signifient les taches sombres et claires.'
+      en: 'NASA compared NISAR radar scenes from January 5 and 17 over the Limpopo and Incomati basins. The official before/after visualizations reveal flooding despite cloud cover. Follow the source link to view the real imagery.',
+      ru: 'NASA сравнило радарные съёмки NISAR от 5 и 17 января вдоль рек Лимпопо и Инкомати. Официальное сравнение до/после показывает затопления сквозь облака. Открой источник для настоящих изображений.',
+      fr: 'NASA compare les scènes radar NISAR des 5 et 17 janvier sur les bassins du Limpopo et de l’Incomati. Consultez la source pour les images authentiques.',
+      es: 'NASA comparó escenas NISAR del 5 y 17 de enero en las cuencas del Limpopo y del Incomati. Abre la fuente para ver imágenes reales.'
     }
   }
 ];
