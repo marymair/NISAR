@@ -28,6 +28,15 @@ jobs:
               items = _catalog(lat, lon, a, b, kind)
               print(kind, a, b, "found", len(items), "science granules")
               if items:
+                  print("sample property keys:", sorted(items[0]["properties"].keys()))
+                  print("sample acquisition fields:", {
+                      k: items[0]["properties"].get(k)
+                      for k in ("startTime", "pathNumber", "frameNumber", "flightDirection", "processingLevel", "dataMaturity")
+                  })
+                  if kind == "flood":
+                      from backend.main import _choose_gc_pair
+                      pair = _choose_gc_pair(items)
+                      print("compatible GCOV pair:", bool(pair))
                   print("first file:", items[0]["properties"].get("fileID"))
                   print("maturity:", items[0]["properties"].get("dataMaturity"))
                   print("data URL present:", bool(items[0].get("url")))
