@@ -390,6 +390,7 @@ async function runScan() {
   const sc = $('#scanner'); const pt = map.project([state.point.lng, state.point.lat]);
   sc.style.left = pt.x + 'px'; sc.style.top = pt.y + 'px';
   sc.classList.add('on'); scanMsg(t('scan.text'));
+  window.setZoriEmotion?.('thinking');
   $('#map-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
   let live = null, liveFailed = false;
   if (LIVE) {
@@ -397,6 +398,7 @@ async function runScan() {
   } else await sleep(300);
   sc.classList.remove('on'); scanMsg('');
   buildReport(live, liveFailed); renderResult();
+  window.setZoriEmotion?.(live ? 'excited' : (liveFailed ? 'worried' : 'curious'));
   $('#result').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 function pickPair(list) {
