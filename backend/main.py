@@ -1,92 +1,101 @@
-"""ASF catalog access. Search is public; reading HDF5 pixels requires Earthdata credentials."""
+"""ZORI NISAR processing API for Google Cloud Run.
+
+Public catalogue search can run without Earthdata credentials. /api/analyze performs
+real, on-demand HDF5 pixel processing, and never substitutes simulated measurements.
+"""
+import os
 from datetime import date
-from urllib.parse import urlparse
-import requests
+from typing import Literal
 
-ASF_SEARCH = "https://api.daac.asf.alaska.edu/services/search/param"
-LEVEL = {"flood": "GCOV", "forest": "GCOV", "ground": "GUNW"}
-MAX_RESULTS = 200
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
+
+from catalog import CatalogError, search, select_products, validate
+from nisar_proc import ProcessingError, process
+
+app = FastAPI(
+    title="ZORI Earth Observatory API",
+    version="0.1.0",
+    description="On-demand search and measurement of published NISAR data from ASF DAAC",
+)
+origins = [x.strip() for x in os.getenv(
+    "ALLOWED_ORIGINS", "http://localhost:8080,http://127.0.0.1:8080"
+).split(",") if x.strip()]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
+    allow_credentials=False,
+)
+
+ChangeType = Literal["flood", "forest", "ground"]
 
 
-class CatalogError(Exception):
-    pass
+class AnalyzeRequest(BaseModel):
+    lat: float = Field(ge=-90, le=90)
+    lon: float = Field(ge=-180, le=180)
+    start_date: date
+    end_date: date
+    change: ChangeType
 
 
-def validate(lat, lon, start_date, end_date, change):
-    if change not in LEVEL:
-        raise ValueError("change must be flood, forest or ground")
-    if not (-90 <= lat <= 90 and -180 <= lon <= 180):
-        raise ValueError("Invalid latitude or longitude")
-    start, end = date.fromisoformat(start_date), date.fromisoformat(end_date)
-    if start > end or end > date.today():
-        raise ValueError("Invalid observation range")
-    if (end - start).days > 730:
-        raise ValueError("Choose a period shorter than two years")
-
-
-def search(lat, lon, start_date, end_date, change):
-    validate(lat, lon, start_date, end_date, change)
-    params = {
-        "dataset": "NISAR",
-        "processingLevel": LEVEL[change],
-        "intersectsWith": "POINT({:.5f} {:.5f})".format(lon, lat),
-        "start": start_date + "T00:00:00Z",
-        "end": end_date + "T23:59:59Z",
-        "maxResults": MAX_RESULTS,
-        "output": "geojson",
-    }
+def safe_search(lat, lon, start, end, change):
     try:
-        response = requests.get(ASF_SEARCH, params=params, timeout=45, headers={"User-Agent": "ZORI-Earth-Observatory/1.0"})
-        response.raise_for_status()
-        data = response.json()
-    except (requests.RequestException, ValueError) as exc:
-        raise CatalogError("ASF catalog could not be reached: " + str(exc)) from exc
-    if not isinstance(data, dict) or not isinstance(data.get("features", []), list):
-        raise CatalogError("Unexpected ASF Search API response")
-    features = [f for f in data.get("features", []) if
-                str(f.get("properties", {}).get("processingLevel", "")).upper() == LEVEL[change]]
-    return {"type": "FeatureCollection", "features": features, "truncated": len(data.get("features", [])) >= MAX_RESULTS}
+        return search(lat, lon, start, end, change)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    except CatalogError as exc:
+        raise HTTPException(502, str(exc)) from exc
 
 
-def scene_url(scene):
-    """Accept only ASF-hosted HDF5 URLs returned by the server-side catalog search."""
-    props = scene.get("properties", {})
-    values = props.get("url") or props.get("downloadUrl") or []
-    if isinstance(values, str):
-        values = [values]
-    for url in values:
-        if not isinstance(url, str):
-            continue
-        parsed = urlparse(url)
-        host = (parsed.hostname or "").lower()
-        if parsed.scheme == "https" and host.endswith(".asf.earthdatacloud.nasa.gov") and parsed.path.lower().endswith(".h5"):
-            return url
-    return None
+@app.get("/health")
+def health():
+    return {
+        "status": "ok",
+        "service": "ZORI-NISAR",
+        "earthdata_configured": bool(os.getenv("EARTHDATA_TOKEN") or (
+            os.getenv("EARTHDATA_USERNAME") and os.getenv("EARTHDATA_PASSWORD")
+        )),
+    }
 
 
-def select_products(features, change):
-    """GCOV: same track/frame/polarization with two distinct dates; GUNW: one pre-paired interferogram."""
-    usable = [f for f in features if scene_url(f)]
-    usable.sort(key=lambda f: f["properties"].get("startTime", ""), reverse=True)
-    if change == "ground":
-        return usable[:1]
-    groups = {}
-    for f in usable:
-        p = f["properties"]
-        track = p.get("pathNumber")
-        frame = p.get("frameNumber")
-        direction = p.get("flightDirection")
-        if track is None or frame is None or direction is None:
-            continue
-        groups.setdefault((str(track), str(frame), str(direction)), []).append(f)
-    for group in sorted(groups.values(), key=lambda g: g[0]["properties"].get("startTime", ""), reverse=True):
-        result, seen = [], set()
-        for f in group:
-            date_key = str(f["properties"].get("startTime", ""))[:10]
-            if not date_key or date_key in seen:
-                continue
-            seen.add(date_key)
-            result.append(f)
-            if len(result) == 2:
-                return list(reversed(result))
-    return []
+@app.get("/api/search")
+def discover(
+    lat: float = Query(ge=-90, le=90),
+    lon: float = Query(ge=-180, le=180),
+    start_date: date = Query(),
+    end_date: date = Query(),
+    change: ChangeType = Query(),
+):
+    return safe_search(lat, lon, str(start_date), str(end_date), change)
+
+
+@app.post("/api/analyze")
+def analyze(request: AnalyzeRequest):
+    if not (os.getenv("EARTHDATA_TOKEN") or (
+        os.getenv("EARTHDATA_USERNAME") and os.getenv("EARTHDATA_PASSWORD")
+    )):
+        raise HTTPException(503, "Earthdata credentials are not configured in Cloud Run")
+    catalog = safe_search(request.lat, request.lon, str(request.start_date), str(request.end_date), request.change)
+    selected = select_products(catalog["features"], request.change)
+    if not selected:
+        reason = (
+            "No suitable GUNW interferogram in the chosen time and location."
+            if request.change == "ground"
+            else "Two GCOV scenes on the same track and frame at different dates were not found."
+        )
+        raise HTTPException(404, reason)
+    try:
+        result = process(selected, request.lat, request.lon, request.change)
+    except ProcessingError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    except Exception as exc:
+        # Keep credentials, download URLs, and traceback out of public responses.
+        import logging
+        logging.exception("NISAR processing failed")
+        raise HTTPException(502, "The HDF5 processing step failed. Consult Cloud Run logs.") from exc
+    result["catalog_truncated"] = catalog["truncated"]
+    result["provenance"] = "ASF DAAC / NASA-ISRO NISAR, processed on request"
+    return result
