@@ -82,7 +82,7 @@ def _catalog(lat, lon, start, end, change):
     errors = []
     # Search both because VALIDATED starts in late October, while earlier
     # calibrated observations belong to the PROVISIONAL archive.
-    for maturity in ("VALIDATED", "PROVISIONAL"):
+    for maturity in (("VALIDATED", "PROVISIONAL", "BETA") if start < date(2026, 6, 17) else ("VALIDATED", "PROVISIONAL")):
         try:
             found = asf.search(
                 dataset="NISAR",
@@ -96,7 +96,7 @@ def _catalog(lat, lon, start, end, change):
             results.extend(_normalize_product(product, maturity) for product in found)
         except Exception as exc:
             errors.append(maturity + ": " + str(exc)[:160])
-    if not results and len(errors) == 2:
+    if not results and len(errors) >= (3 if start < date(2026, 6, 17) else 2):
         raise RuntimeError(_search_timeout_notice + " (" + " | ".join(errors) + ")")
     unique = {}
     for item in results:
