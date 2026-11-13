@@ -15,12 +15,12 @@
     return '<svg viewBox="0 0 160 190" role="img" aria-label="ZORI: '+mood+'" xmlns="http://www.w3.org/2000/svg">'+
       '<defs><linearGradient id="skin" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#c8f5ff"/><stop offset=".42" stop-color="#66d8ff"/><stop offset="1" stop-color="#2487d9"/></linearGradient><linearGradient id="suit" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#258bdc"/><stop offset="1" stop-color="#153e9d"/></linearGradient><radialGradient id="shine"><stop stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>'+
       '<ellipse cx="80" cy="177" rx="39" ry="7" fill="#35caff" opacity=".2"/>'+
-      '<path d="M53 36 Q34 2 19 17 Q7 32 37 52Z M107 36 Q126 2 141 17 Q153 32 123 52Z" fill="url(#skin)" stroke="#4cbff4" stroke-width="2"/>'+
-      '<path d="M57 24 Q48 -2 59 3 Q70 6 69 25 M103 24 Q112 -2 101 3 Q90 6 91 25" fill="none" stroke="#66d8ff" stroke-width="9" stroke-linecap="round"/><circle cx="59" cy="4" r="5" fill="#9a8aff"/><circle cx="101" cy="4" r="5" fill="#9a8aff"/>'+
+      '<path d="M52 42 Q7 10 9 48 Q12 73 39 66Z" fill="#77e6e0" stroke="#4cbff4" stroke-width="2"/><path d="M108 40 Q149 9 153 37 Q159 65 120 68Z" fill="#ad86ff" stroke="#4cbff4" stroke-width="2"/>'+
+      '<path d="M69 23 Q54 1 69 8 Q80 12 80 24" fill="none" stroke="#65e9e4" stroke-width="7" stroke-linecap="round"/><circle cx="69" cy="8" r="5" fill="#a4faff"/><path d="M112 38 Q139 18 144 29" fill="none" stroke="#b595ff" stroke-width="5" stroke-linecap="round"/>'+
       '<path d="M52 130 Q26 127 20 102 M108 130 Q133 137 142 111" fill="none" stroke="#54caff" stroke-width="13" stroke-linecap="round"/><circle cx="19" cy="98" r="9" fill="#8deaff"/><circle cx="143" cy="107" r="9" fill="#8deaff"/>'+
       '<path d="M47 126 Q80 108 113 126 L122 178 L38 178Z" fill="url(#suit)" stroke="#69d9ff" stroke-width="2"/><path d="M56 120 Q80 139 104 120 L98 112 Q80 126 62 112Z" fill="#ff9bd4"/><circle cx="80" cy="151" r="10" fill="#b6f6ff" stroke="#8b8cff" stroke-width="3"/><path d="M74 151h12 M80 145v12" stroke="#4776ca" stroke-width="2"/>'+
       '<path d="M50 164 L39 181 L58 181 L66 168 M110 164 L121 181 L102 181 L94 168" fill="#152d76" stroke="#5bd7ff" stroke-width="2"/>'+
-      '<ellipse cx="80" cy="72" rx="54" ry="52" fill="url(#skin)" stroke="#8ce8ff" stroke-width="2"/><ellipse cx="63" cy="49" rx="37" ry="26" fill="url(#shine)"/>'+
+      '<path d="M112 157 Q151 156 146 179 Q134 170 125 180" fill="none" stroke="#7af0e9" stroke-width="8" stroke-linecap="round"/><path d="M144 177 L154 168 L157 183Z" fill="#b493ff"/><ellipse cx="80" cy="72" rx="54" ry="52" fill="url(#skin)" stroke="#8ce8ff" stroke-width="2"/><ellipse cx="63" cy="49" rx="37" ry="26" fill="url(#shine)"/><path d="M80 29 L88 39 L80 49 L72 39Z" fill="#d9fff9" stroke="#5589f6" stroke-width="2"/><path d="M80 33 L84 39 L80 45 L76 39Z" fill="#49c9db"/>'+
       f[0]+'<ellipse cx="35" cy="88" rx="8" ry="4" fill="#ff9bc9" opacity=".55"/><ellipse cx="125" cy="88" rx="8" ry="4" fill="#ff9bc9" opacity=".55"/>'+f[1]+'</svg>';
   }
   function setEmotion(mood) {
