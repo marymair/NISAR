@@ -1,0 +1,43 @@
+name: Docker Cloud Run readiness
+on:
+  push:
+    paths:
+      - Dockerfile
+      - backend/**
+      - frontend/**
+      - .github/workflows/docker-readiness.yml
+  workflow_dispatch:
+jobs:
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build actual Cloud Run image
+        run: docker build --tag zori-observatory-smoke .
+      - name: Start service and test HTTP API + frontend
+        run: |
+          docker run -d --name zori-observatory-smoke -p 127.0.0.1:18080:8080 zori-observatory-smoke
+          for n in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:18080/health > /tmp/zori-health.json; then break; fi
+            sleep 2
+          done
+          python - <<'PY'
+          import json
+          from urllib.request import urlopen
+          status=json.load(open('/tmp/zori-health.json'))
+          print(status)
+          assert status['status']=='ok'
+          assert status['earthdata_credentials_configured'] is False
+          content=urlopen('http://127.0.0.1:18080/').read().decode()
+          assert 'zori.js' in content and 'alien-upgrade.css' in content
+          js=urlopen('http://127.0.0.1:18080/zori.js').read()
+          assert b'setZoriEmotion' in js
+          print('Container serves frontend and science API.')
+          PY
+      - name: Docker diagnostics if failed
+        if: failure()
+        run: docker logs zori-observatory-smoke || true
+      - name: Stop
+        if: always()
+        run: docker rm -f zori-observatory-smoke || true
