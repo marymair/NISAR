@@ -84,10 +84,9 @@ def _catalog(lat, lon, start, end, change):
     # calibrated observations belong to the PROVISIONAL archive.
     for maturity in (("VALIDATED", "PROVISIONAL", "BETA") if start < date(2026, 6, 17) else ("VALIDATED", "PROVISIONAL")):
         try:
+            collection = "NISAR_L2_" + level + ("" if maturity == "VALIDATED" else "_" + maturity) + "_V1"
             found = asf.search(
-                dataset="NISAR",
-                processingLevel=level,
-                dataMaturity=maturity,
+                shortName=collection,
                 intersectsWith=f"POINT({lon:.5f} {lat:.5f})",
                 start=start.isoformat() + "T00:00:00Z",
                 end=end.isoformat() + "T23:59:59Z",
