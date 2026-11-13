@@ -76,3 +76,19 @@ html[data-theme="light"][data-change="ground"]{--accent:#6331b1;--accent-2:#6654
 #zori-widget .bubble{max-height:min(240px,35vh);overflow-y:auto}
 .live-difference{margin:16px 0 2px}
 .live-difference figcaption{line-height:1.45}
+
+/* Original illustrated laboratory panorama behind the introductory mission. */
+body[data-screen="intro"] .hero{
+  background-image:
+    linear-gradient(100deg,rgba(2,10,28,.97) 0%,rgba(3,15,34,.91) 37%,rgba(5,20,43,.36) 73%,rgba(4,15,36,.18) 100%),
+    url("assets/observatory.svg");
+  background-position:center,center;
+  background-repeat:no-repeat,no-repeat;
+  background-size:cover,cover;
+}
+html[data-theme="light"] body[data-screen="intro"] .hero{
+  background-image:
+    linear-gradient(100deg,rgba(241,249,255,.97) 0%,rgba(235,245,255,.91) 44%,rgba(231,239,255,.56) 100%),
+    url("assets/observatory.svg");
+}
+@media(max-width:850px){body[data-screen="intro"] .hero{background-position:center,60% center;background-size:cover,auto 100%}}
