@@ -1,6 +1,11 @@
-FROM nginx:1.27-alpine
-COPY frontend/ /usr/share/nginx/html/
-COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
+FROM python:3.12-slim
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PORT=8080 HOME=/tmp
+WORKDIR /app
+COPY backend/requirements.txt /app/backend/requirements.txt
+RUN pip install --no-cache-dir -r /app/backend/requirements.txt
+COPY frontend/ /app/frontend/
+COPY backend/ /app/backend/
+RUN useradd -r -u 10001 -m zori && chown -R zori /app
+USER zori
 EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=3s CMD wget -q -O /dev/null http://127.0.0.1:8080/ || exit 1
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["sh", "-c", "exec uvicorn backend.main:app --host 0.0.0.0 --port ${PORT} --workers 1 --timeout-keep-alive 60"]
