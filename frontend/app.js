@@ -90,7 +90,17 @@ function setChange(id) {
 }
 
 /* ---------- ZORI helper ---------- */
-function zoriSay(text) { $('#zori-text').textContent = text; $('#zori').classList.add('open'); }
+function zoriSay(text) {
+  $('#zori-text').textContent = text;
+  $('#zori-widget').classList.add('open');
+  const msg = String(text || '').toLowerCase();
+  let mood = 'happy';
+  if (/error|failed|no data|not available|пока нет|ошиб|недостаточно|aucune|sin datos|pas de données/.test(msg)) mood = 'worried';
+  else if (/scan|analy|обработ|анализ|скан|radar|processing|traitement|procesando/.test(msg)) mood = 'thinking';
+  else if (/found|detect|обнаруж|нашл|wow|удив|incredible|incroyable/.test(msg)) mood = 'surprised';
+  else if (/curious|интерес|explor|изуч|explorons|exploremos/.test(msg)) mood = 'curious';
+  window.setZoriEmotion?.(mood);
+}
 function startNotes() {
   clearInterval(noteTimer);
   const arr = I18N[state.lang].notes;
@@ -110,7 +120,7 @@ function fillExplain() {
   $$('#ex-levels button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.level === state.exLevel)));
   $('#ex-text').textContent = state.change ? t(`ex.${state.change}.${state.exLevel}`) : '';
 }
-function openExplain() { if (!state.change) return; state.exLevel = 1; fillExplain(); $('#explain').showModal(); }
+function openExplain() { if (!state.change) return; state.exLevel = 1; fillExplain(); window.setZoriEmotion?.('thinking'); $('#explain').showModal(); }
 
 /* ---------- screens ---------- */
 function enterApp(view = 'mission') {
@@ -523,7 +533,7 @@ function bind() {
   $('#copy').onclick = async () => { try { await navigator.clipboard.writeText(location.href); $('#analyze-why').textContent = t('a.copied'); } catch {} };
 
   $('#zori-face').onclick = () => { const a = I18N[state.lang].notes; noteIdx = (noteIdx + 1) % a.length; zoriSay(a[noteIdx]); };
-  $('#zori-close').onclick = () => $('#zori').classList.remove('open');
+  $('#zori-close').onclick = () => $('#zori-widget').classList.remove('open');
   $$('#ex-levels button').forEach(b => { b.onclick = () => { state.exLevel = +b.dataset.level; fillExplain(); }; });
   $('#ex-close').onclick = () => $('#explain').close();
 }
