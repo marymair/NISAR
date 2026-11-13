@@ -18,7 +18,8 @@ const EMPTY = { type: 'FeatureCollection', features: [] };
 const BASES = ['sat', 'nasa', 'map'];
 const PUBLIC_START = '2026-06-17';       /* first public calibrated L-band observations */
 const CFG = window.NISAR_CONFIG || {};
-const LIVE = !!(CFG.BACKEND_URL && CFG.API_KEY && !CFG.API_KEY.startsWith('PUT_'));
+const API_BASE = String(CFG.BACKEND_URL || (location.protocol.startsWith('http') ? location.origin : '')).replace(/\/$/, '');
+const LIVE = !!(CFG.ENABLE_PROCESSING && API_BASE);
 
 const state = {
   lang: 'en', theme: 'dark', change: null,
@@ -84,6 +85,7 @@ function setChange(id) {
   if (id) document.documentElement.dataset.change = id; else delete document.documentElement.dataset.change;
   $$('.change-card').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.change === id)));
   if (id) zoriSay(t('z.' + id));
+  if (state.point) recheck();
   if (map && mapReady) setTimeout(paintAccent, 800);
   refreshPanel();
   if (state.report || state.sample) renderResult();
@@ -267,22 +269,33 @@ async function geocode(lat, lng, token) {
 }
 /* Is there any NISAR product over this exact point, inside the chosen dates? (ASF DAAC SearchAPI, no login for search) */
 async function checkData(lat, lng, token) {
-  const url = 'https://api.daac.asf.alaska.edu/services/search/param?dataset=NISAR&maxResults=500&output=geojson'
+  const direct = 'https://api.daac.asf.alaska.edu/services/search/param?dataset=NISAR&maxResults=300&output=geojson'
     + `&start=${state.range.from}T00:00:00Z&end=${state.range.to}T23:59:59Z`
     + '&intersectsWith=' + encodeURIComponent(`POINT(${lng} ${lat})`);
-  const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 25000);
+  const params = new URLSearchParams({
+    lat: String(lat), lon: String(lng),
+    start: state.range.from, end: state.range.to,
+    change: state.change || 'flood'
+  });
+  const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 40000);
   try {
-    const r = await fetch(url, { signal: ctl.signal });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const j = await r.json();
+    let response = LIVE ? await fetch(API_BASE + '/api/search?' + params, { signal: ctl.signal }) : null;
+    if (!response || !response.ok) {
+      // Public ASF Search API remains a backup if the Cloud Run API is not deployed yet.
+      response = await fetch(direct, { signal: ctl.signal });
+    }
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const j = await response.json();
     if (token !== reqId) return;
     state.scenes = (j.features || []).map(f => ({ ...f.properties, geometry: f.geometry }))
       .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
     state.status = state.scenes.length ? 'found' : 'none';
+    window.setZoriEmotion?.(state.status === 'found' ? 'excited' : 'worried');
   } catch (e) {
-    console.warn('ASF search failed:', e);
+    console.warn('NASA ASF catalog search failed:', e);
     if (token !== reqId) return;
     state.status = 'error';
+    window.setZoriEmotion?.('worried');
   } finally { clearTimeout(to); }
   if (token === reqId) { refreshPanel(); renderTimeline(); }
 }
@@ -342,23 +355,36 @@ function scanMsg(txt) { const m = $('#scan-msg'); m.textContent = txt; m.hidden 
 
 /* optional: your Google Cloud backend processes the real interferogram (Ground motion only) */
 async function liveAnalyze() {
-  const base = CFG.BACKEND_URL.replace(/\/$/, '');
-  const H = { 'Content-Type': 'application/json', 'X-API-Key': CFG.API_KEY };
+  const base = API_BASE;
+  const headers = { 'Content-Type': 'application/json' };
   const r = await fetch(base + '/analyze', {
-    method: 'POST', headers: H,
-    body: JSON.stringify({ lat: state.point.lat, lon: state.point.lng, start_date: state.range.from, end_date: state.range.to, change: state.change })
+    method: 'POST', headers,
+    body: JSON.stringify({
+      lat: state.point.lat, lon: state.point.lng,
+      start_date: state.range.from, end_date: state.range.to, change: state.change
+    })
   });
   const j = await r.json();
-  if (j.error || !j.job_id) throw new Error(j.error || 'no job id');
-  const t0 = Date.now();
-  for (let i = 0; i < 225; i++) {                 /* up to about 15 minutes */
+  if (!r.ok || j.error || !j.job_id) throw new Error(j.detail || j.error || 'No analysis job ID');
+  for (let i = 0; i < 225; i++) {
     await sleep(4000);
-    scanMsg(`${t('live.run')} ${Math.round((Date.now() - t0) / 1000)} s`);
-    const s = await (await fetch(`${base}/status/${j.job_id}`, { headers: { 'X-API-Key': CFG.API_KEY } })).json();
-    if (s.status === 'done') return { jobId: j.job_id, stats: s.stats || {}, img: `${base}/image/${j.job_id}?api_key=${encodeURIComponent(CFG.API_KEY)}` };
-    if (s.status === 'error') throw new Error(s.error || 'processing error');
+    const rr = await fetch(base + '/status/' + j.job_id);
+    if (!rr.ok) throw new Error('Job status HTTP ' + rr.status);
+    const s = await rr.json();
+    if (s.status === 'done') {
+      const imgs = s.images || {};
+      const full = key => imgs[key] ? new URL(imgs[key], base).href : null;
+      return {
+        jobId: j.job_id, stats: s.stats || {},
+        sources: s.sources || [], method: s.method,
+        beforeImg: full('before'), afterImg: full('after'),
+        diffImg: full('difference'), img: full('difference')
+      };
+    }
+    if (s.status === 'error') throw new Error(s.error || 'Processing error');
+    scanMsg(t('live.run') + ' · ' + (i + 1) * 4 + 's');
   }
-  throw new Error('timeout');
+  throw new Error('Analysis timed out');
 }
 async function runScan() {
   const sc = $('#scanner'); const pt = map.project([state.point.lng, state.point.lat]);
@@ -366,9 +392,9 @@ async function runScan() {
   sc.classList.add('on'); scanMsg(t('scan.text'));
   $('#map-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
   let live = null, liveFailed = false;
-  if (LIVE && state.change === 'ground') {
+  if (LIVE) {
     try { live = await liveAnalyze(); } catch (e) { console.warn('live analysis failed:', e); liveFailed = true; }
-  } else await sleep(3000);
+  } else await sleep(300);
   sc.classList.remove('on'); scanMsg('');
   buildReport(live, liveFailed); renderResult();
   $('#result').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -419,8 +445,19 @@ function renderResult() {
     const dates = state.scenes.map(x => x.startTime).filter(Boolean);
     facts.push(t('r.kf.scenes', { n: state.scenes.length, a: fmtDate(dates[0]), b: fmtDate(dates.at(-1)) }));
     if (live) {
-      media = `<span class="live-badge">${esc(t('live.badge'))}</span><img class="single" src="${esc(live.img)}" alt="${esc(title)}">`;
+      media = `<span class="live-badge">${esc(t('live.badge'))}</span>`;
+      if (live.beforeImg && live.afterImg) {
+        media += compareHTML(live.beforeImg, live.afterImg, t('r.before'), t('r.after'));
+        media += `<figure class="live-difference"><img class="single" src="${esc(live.diffImg)}" alt="${esc(t('r.diff'))}"><figcaption>${esc(t('live.visualdifference'))}</figcaption></figure>`;
+      } else if (live.img) {
+        media += `<figure><img class="single" src="${esc(live.img)}" alt="${esc(title)}"><figcaption>${esc(t('live.phase'))}</figcaption></figure>`;
+      }
       const st = live.stats;
+      if (Number.isFinite(st.median_delta_db)) facts.push(t('live.median', {n: st.median_delta_db.toFixed(2)}));
+      if (Number.isFinite(st.changed_pixel_fraction)) facts.push(t('live.changed', {n: (st.changed_pixel_fraction * 100).toFixed(1)}));
+      if (Number.isFinite(st.relative_phase_iqr_rad)) facts.push(t('live.phaseiqr', {n: st.relative_phase_iqr_rad.toFixed(2)}));
+      extra = `<p class="note">${esc(live.method || '')}</p><p class="note">${esc(t('live.warning'))}</p>`;
+      if (live.sources.length) extra += `<details><summary>${esc(t('live.sources'))}</summary><ul class="scene-list">${live.sources.map(s => `<li>${esc(s.date || '')} · ${esc(s.maturity || '')} · ${esc(s.id || '')}</li>`).join('')}</ul></details>`;
       if (Number.isFinite(st.disp_min_cm) && Number.isFinite(st.disp_max_cm)) facts.push(t('r.disp', { a: st.disp_min_cm.toFixed(2), b: st.disp_max_cm.toFixed(2) }));
     } else if (!rec.length) {
       extra = `<p class="note">${esc(t('r.norec', { levels: levelSummary() }))}</p>`;
