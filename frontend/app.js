@@ -1,10 +1,11 @@
 // app.js — логика для ZORI Earth Dance Observatory
-// Этот код связывает интерфейс с бэкендом на Google Cloud
+// Связывает интерфейс с бэкендом на Google Cloud
 
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Проверяем, что config.js загружен ---
+    // --- Проверяем конфиг ---
     if (!window.NISAR_CONFIG) {
         console.error("config.js не загружен!");
+        alert("Ошибка: config.js не загружен.");
         return;
     }
 
@@ -15,17 +16,17 @@ document.addEventListener('DOMContentLoaded', () => {
     let map = null;
     let currentMarker = null;
 
-    // --- Элементы интерфейса ---
+    // --- Элементы ---
+    const intro = document.getElementById('intro');
+    const app = document.getElementById('app');
+    const btnBegin = document.getElementById('begin');
     const btnAnalyze = document.getElementById('analyze');
     const statusBox = document.getElementById('status');
     const statusText = document.getElementById('status-text');
     const statusDetail = document.getElementById('status-detail');
     const resultBox = document.getElementById('result');
-    const btnBegin = document.getElementById('begin');
-    const introScreen = document.getElementById('intro');
-    const appScreen = document.getElementById('app');
 
-    // --- Инициализация карты (MapLibre) ---
+    // --- Карта MapLibre ---
     if (typeof maplibregl !== 'undefined' && document.getElementById('map')) {
         map = new maplibregl.Map({
             container: 'map',
@@ -38,20 +39,14 @@ document.addEventListener('DOMContentLoaded', () => {
             selectedLng = e.lngLat.lng;
             selectedLat = e.lngLat.lat;
 
-            // Обновляем UI
-            const coordEl = document.getElementById('p-coords');
-            if (coordEl) coordEl.innerText = `${selectedLat.toFixed(4)}, ${selectedLng.toFixed(4)}`;
-            
-            const nameEl = document.getElementById('p-name');
-            if (nameEl) nameEl.innerText = 'Selected Point';
+            document.getElementById('p-coords').innerText = `${selectedLat.toFixed(4)}, ${selectedLng.toFixed(4)}`;
+            document.getElementById('p-name').innerText = 'Selected Point';
 
-            // Ставим маркер
             if (currentMarker) currentMarker.remove();
             currentMarker = new maplibregl.Marker({color: '#a78bfa'})
                 .setLngLat([selectedLng, selectedLat])
                 .addTo(map);
 
-            // Проверяем данные
             checkDataAvailability();
         });
     }
@@ -67,20 +62,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Переход на экран приложения ---
+    // --- Кнопка "Begin mission" ---
     if (btnBegin) {
         btnBegin.addEventListener('click', () => {
-            introScreen.classList.add('leaving');
+            intro.classList.add('leaving');
             setTimeout(() => {
-                introScreen.hidden = true;
-                appScreen.hidden = false;
+                intro.hidden = true;
+                app.hidden = false;
                 document.body.dataset.screen = 'app';
                 if (map) map.resize();
             }, 450);
         });
     }
 
-    // --- Проверка данных через бэкенд ---
+    // --- Проверка доступности данных ---
     async function checkDataAvailability() {
         if (!selectedChange || !selectedLat) return;
 
