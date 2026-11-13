@@ -1,261 +1,224 @@
-"""On-demand, scientifically labelled NISAR HDF5 subset processing.
+"""NISAR GCOV/GUNW real-data reading and quantitative quick-look analysis.
 
-GCOV: co-registered gamma0 backscatter (10 log10(power)) in dB.
-GUNW: unwrapped interferometric phase in radians; NOT a corrected displacement map.
-All pixels originate from an authenticated ASF NISAR HDF5 product.
+No mock data: every output is computed from authenticated NASA Earthdata files.
+All spatial windows are clipped to a small area around the requested coordinates.
 """
-import base64
-import io
-import math
-import os
-from contextlib import contextmanager
+from __future__ import annotations
 
-import aiohttp
-import fsspec
+from contextlib import contextmanager
+from io import BytesIO
+from math import pi
+from urllib.parse import urlparse
+import os
+
 import h5py
 import numpy as np
 from PIL import Image
 from pyproj import Transformer
-from scipy.ndimage import map_coordinates
-
-from catalog import scene_url
+from scipy.interpolate import RegularGridInterpolator
 
 
-class ProcessingError(Exception):
-    pass
+MAX_SIDE = int(os.environ.get("NISAR_WINDOW_PIXELS", "384"))
+MAX_SIDE = max(96, min(MAX_SIDE, 640))
 
 
-RESOLUTION = 192
-ROI_RADIUS_KM = 2.5
-MAX_WINDOW_PIXELS = 1_500_000
-GCOV_CHANNELS = {
-    "flood": ("HHHH", "VVVV", "RHRH", "RVRV", "HVHV", "VHVH"),
-    "forest": ("HVHV", "VHVH", "HHHH", "VVVV", "RHRH", "RVRV"),
-}
+def _allowed_url(url: str) -> bool:
+    p = urlparse(url)
+    host = (p.hostname or "").lower()
+    return p.scheme == "https" and (
+        host.endswith(".asf.earthdatacloud.nasa.gov")
+        or host == "asf.earthdatacloud.nasa.gov"
+        or host.endswith(".asf.alaska.edu")
+        or host == "asf.alaska.edu"
+    ) and p.path.lower().endswith(".h5")
 
 
 @contextmanager
-def open_product(url):
-    user = os.environ.get("EARTHDATA_USERNAME", "")
-    password = os.environ.get("EARTHDATA_PASSWORD", "")
-    token = os.environ.get("EARTHDATA_TOKEN", "")
-    if user and password:
-        fs = fsspec.filesystem("https", client_kwargs={"auth": aiohttp.BasicAuth(user, password)})
-    elif token:
-        fs = fsspec.filesystem("https", headers={"Authorization": "Bearer " + token})
-    else:
-        raise ProcessingError("Earthdata authorization is not configured on the server")
-    try:
-        # fsspec issues remote HTTP Range requests; HDF5 is not downloaded in full.
-        with fs.open(url, mode="rb", cache_type="blockcache", block_size=8 * 1024 * 1024) as remote:
-            with h5py.File(remote, "r") as h5:
-                yield h5
-    except ProcessingError:
-        raise
-    except Exception as exc:
-        raise ProcessingError("Unable to stream ASF HDF5 data: " + str(exc)) from exc
+def open_remote_h5(url: str):
+    """Use authenticated HTTP range reads, not a multi-GB local download."""
+    if not _allowed_url(url):
+        raise ValueError("This is not an ASF NISAR HDF5 URL")
+    if not (os.environ.get("EARTHDATA_TOKEN") or
+            (os.environ.get("EARTHDATA_USERNAME") and os.environ.get("EARTHDATA_PASSWORD"))):
+        raise RuntimeError("EARTHDATA_LOGIN_REQUIRED: configure an Earthdata secret on Cloud Run")
+    import earthaccess
+    auth = earthaccess.login(strategy="environment")
+    if not auth.authenticated:
+        raise RuntimeError("Earthdata login failed")
+    fs = earthaccess.get_fsspec_https_session()
+    with fs.open(url, "rb", block_size=8 * 1024 * 1024, cache_type="blockcache") as stream:
+        with h5py.File(stream, "r", rdcc_nbytes=16 * 1024 * 1024) as file:
+            yield file
 
 
-def target_coordinates(lat, lon):
-    # Fixed local geographic AOI, common to all observation dates.
-    radius_lat = ROI_RADIUS_KM / 111.195
-    cosine = max(abs(math.cos(math.radians(lat))), 0.12)
-    radius_lon = radius_lat / cosine
-    longs = np.linspace(lon - radius_lon, lon + radius_lon, RESOLUTION)
-    lats = np.linspace(lat + radius_lat, lat - radius_lat, RESOLUTION)
-    return np.meshgrid(longs, lats)
+def _find_grid(group, dataset):
+    """Find x/y coordinate axes and EPSG code in the current/parent groups."""
+    node = dataset.parent
+    x = y = epsg = None
+    while node is not None and node.name != "/":
+        if x is None and "xCoordinates" in node:
+            x = np.asarray(node["xCoordinates"][:], dtype="float64")
+        if y is None and "yCoordinates" in node:
+            y = np.asarray(node["yCoordinates"][:], dtype="float64")
+        if epsg is None and "projection" in node:
+            p = node["projection"]
+            for candidate in (p.attrs.get("epsg_code"), p[()]):
+                try:
+                    value = int(np.asarray(candidate).reshape(-1)[0])
+                    if 1024 <= value < 100000:
+                        epsg = value
+                        break
+                except (TypeError, ValueError, IndexError):
+                    pass
+        node = node.parent
+    if x is None or y is None or epsg is None:
+        raise ValueError("NISAR grid lacks coordinate axes or EPSG projection")
+    return x, y, epsg
 
 
-def find_grid(h5, layer):
-    group = h5[layer.rsplit("/", 1)[0]]
-    while group.name != "/":
-        if "xCoordinates" in group and "yCoordinates" in group:
-            x = np.asarray(group["xCoordinates"][:], dtype="float64")
-            y = np.asarray(group["yCoordinates"][:], dtype="float64")
-            proj = group.get("projection")
-            if proj is None:
-                # Some products put projection on the parent frequency grid.
-                parent = group.parent
-                proj = parent.get("projection")
-            if proj is not None:
-                epsg = proj.attrs.get("epsg_code")
-                if epsg is not None:
-                    return x, y, int(np.asarray(epsg).reshape(-1)[0])
-        group = group.parent
-    raise ProcessingError("This NISAR product lacks a supported georeferenced grid")
+def _extract(file, path: str, lon: float, lat: float):
+    if path not in file:
+        raise ValueError("The required science layer is absent: " + path)
+    layer = file[path]
+    x, y, epsg = _find_grid(file, layer)
+    if len(layer.shape) != 2 or layer.shape != (len(y), len(x)):
+        raise ValueError("Unexpected NISAR raster dimensions")
+    mx, my = Transformer.from_crs(4326, epsg, always_xy=True).transform(lon, lat)
+    cx, cy = int(np.argmin(abs(x - mx))), int(np.argmin(abs(y - my)))
+    half = MAX_SIDE // 2
+    sx = slice(max(0, cx - half), min(len(x), cx + half))
+    sy = slice(max(0, cy - half), min(len(y), cy + half))
+    if abs(x[cx] - mx) > 500 or abs(y[cy] - my) > 500:
+        raise ValueError("The scene does not cover the requested point")
+    if sx.stop - sx.start < 48 or sy.stop - sy.start < 48:
+        raise ValueError("Not enough coverage around this point")
+    data = np.asarray(layer[sy, sx], dtype="float32")
+    return data, x[sx], y[sy], epsg
 
 
-def fractional_indices(axis, values):
-    if axis[0] <= axis[-1]:
-        return np.interp(values, axis, np.arange(axis.size), left=np.nan, right=np.nan)
-    return np.interp(values, axis[::-1], np.arange(axis.size - 1, -1, -1), left=np.nan, right=np.nan)
+def _gcov_layer(file, mode: str):
+    group = "/science/LSAR/GCOV/grids/frequencyA"
+    if group not in file:
+        raise ValueError("No frequencyA GCOV science grid")
+    g = file[group]
+    preferred = ("HVHV", "HHHH", "VVVV") if mode == "forest" else ("HHHH", "VVVV", "HVHV")
+    for term in preferred:
+        if term in g:
+            return group + "/" + term, term
+    raise ValueError("No real-valued GCOV covariance term available")
 
 
-def sample_layer(h5, layer, lon_mesh, lat_mesh):
-    ds = h5[layer]
-    if ds.ndim != 2:
-        raise ProcessingError("Expected a two-dimensional geocoded NISAR dataset")
-    xs, ys, epsg = find_grid(h5, layer)
-    if ds.shape != (ys.size, xs.size):
-        raise ProcessingError("Coordinate axes do not match the NISAR raster shape")
-    tx, ty = Transformer.from_crs(4326, epsg, always_xy=True).transform(lon_mesh, lat_mesh)
-    px = fractional_indices(xs, tx)
-    py = fractional_indices(ys, ty)
-    valid = np.isfinite(px) & np.isfinite(py)
-    if int(valid.sum()) < int(RESOLUTION * RESOLUTION * 0.10):
-        raise ProcessingError("Chosen point is outside the usable radar grid")
-    x0 = max(0, int(np.floor(np.nanmin(px))) - 2)
-    x1 = min(ds.shape[1], int(np.ceil(np.nanmax(px))) + 3)
-    y0 = max(0, int(np.floor(np.nanmin(py))) - 2)
-    y1 = min(ds.shape[0], int(np.ceil(np.nanmax(py))) + 3)
-    if (x1 - x0) * (y1 - y0) > MAX_WINDOW_PIXELS:
-        raise ProcessingError("Requested pixel window is too large; try a smaller region")
-    cropped = np.asarray(ds[y0:y1, x0:x1], dtype="float32")
-    for attr in ("_FillValue", "fill_value"):
-        if attr in ds.attrs:
-            v = float(np.asarray(ds.attrs[attr]).reshape(-1)[0])
-            cropped[np.isclose(cropped, v)] = np.nan
-    cropped[~np.isfinite(cropped)] = np.nan
-    coords = np.array([np.where(valid, py - y0, -999), np.where(valid, px - x0, -999)])
-    samples = map_coordinates(cropped, coords, order=1, mode="constant", cval=np.nan)
-    samples[~valid] = np.nan
-    return samples, epsg
+def _regrid(source, sx, sy, src_epsg, tx, ty, target_epsg):
+    """Explicit geospatial resampling rather than comparing mismatched pixels."""
+    xx, yy = np.meshgrid(tx, ty)
+    if src_epsg != target_epsg:
+        xx, yy = Transformer.from_crs(target_epsg, src_epsg, always_xy=True).transform(xx, yy)
+    interpolator = RegularGridInterpolator(
+        (sy, sx), source, bounds_error=False, fill_value=np.nan,
+        method="linear")
+    return interpolator(np.column_stack((yy.ravel(), xx.ravel()))).reshape(xx.shape)
 
 
-def choose_gcov_channel(h5, change):
-    group_name = "/science/LSAR/GCOV/grids/frequencyA"
-    if group_name not in h5:
-        raise ProcessingError("The requested product has no LSAR GCOV frequencyA grid")
-    group = h5[group_name]
-    for channel in GCOV_CHANNELS[change]:
-        if channel in group:
-            return group_name + "/" + channel, channel
-    raise ProcessingError("No supported real-valued GCOV backscatter channel found")
+def _png_rgb(rgb):
+    out = BytesIO()
+    Image.fromarray(rgb.astype("uint8"), "RGB").save(out, format="PNG", optimize=True)
+    return out.getvalue()
 
 
-def choose_gunw_layer(h5):
-    base = "/science/LSAR/GUNW/grids/frequencyA/unwrappedInterferogram"
-    for pol in ("HH", "VV"):
-        layer = base + "/" + pol + "/unwrappedPhase"
-        if layer in h5:
-            return layer, pol
-    raise ProcessingError("The NISAR GUNW scene lacks an HH/VV unwrapped phase layer")
+def _gray(db):
+    valid = np.isfinite(db)
+    clipped = np.clip((np.where(valid, db, -35) + 35) / 40, 0, 1)
+    image = (clipped * 235 + 10).astype("uint8")
+    return np.stack([image, image, image], axis=-1)
 
 
-def read_scene(feature, change, lon_grid, lat_grid):
-    url = scene_url(feature)
-    if not url:
-        raise ProcessingError("ASF supplied no supported authenticated HDF5 download URL")
-    with open_product(url) as h5:
-        if change == "ground":
-            layer, channel = choose_gunw_layer(h5)
-            arr, epsg = sample_layer(h5, layer, lon_grid, lat_grid)
-            # A GUNW product includes a two-acquisition interferogram already.
-            if int(np.isfinite(arr).sum()) < 500:
-                raise ProcessingError("Insufficient valid interferometric phase in this region")
-            coherence_layer = layer.rsplit("/", 1)[0] + "/coherenceMagnitude"
-            if coherence_layer in h5:
-                coherence, _ = sample_layer(h5, coherence_layer, lon_grid, lat_grid)
-                arr[~(coherence >= 0.35)] = np.nan
-        else:
-            layer, channel = choose_gcov_channel(h5, change)
-            power, epsg = sample_layer(h5, layer, lon_grid, lat_grid)
-            with np.errstate(divide="ignore", invalid="ignore"):
-                arr = np.where(power > 0, 10.0 * np.log10(power), np.nan)
-        return {"arr": arr, "channel": channel, "epsg": epsg, "layer": layer}
-
-
-def png_data(array, lo, hi, palette):
-    valid = np.isfinite(array)
-    span = max(hi - lo, 1e-6)
-    fraction = np.clip((np.where(valid, array, lo) - lo) / span, 0, 1)
-    palette = np.asarray(palette, dtype=np.float32)
-    index = fraction * (len(palette) - 1)
-    low = np.floor(index).astype(int)
-    high = np.minimum(low + 1, len(palette) - 1)
-    tint = index - low
-    rgb = palette[low] * (1 - tint[..., None]) + palette[high] * tint[..., None]
-    rgb[~valid] = [9, 18, 38]
-    image = Image.fromarray(np.uint8(np.clip(rgb, 0, 255)), "RGB")
-    image = image.resize((512, 512), Image.Resampling.BILINEAR)
-    buf = io.BytesIO()
-    image.save(buf, format="PNG", optimize=True)
-    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
-
-
-RADAR = [[8, 18, 47], [20, 75, 120], [31, 155, 170], [137, 225, 211], [241, 244, 221]]
-DELTA = [[29, 88, 206], [70, 129, 204], [13, 26, 54], [239, 149, 64], [240, 68, 67]]
-PHASE = [[30, 38, 107], [93, 75, 192], [40, 181, 228], [107, 219, 166], [249, 193, 100], [220, 93, 109]]
-
-
-def scene_metadata(feature):
-    p = feature.get("properties", {})
+def process_gcov(scene1: dict, scene2: dict, lat: float, lon: float, mode: str):
+    files = []
+    for scene in (scene1, scene2):
+        with open_remote_h5(scene["url"]) as f:
+            layer, term = _gcov_layer(f, mode)
+            raster, xs, ys, epsg = _extract(f, layer, lon, lat)
+            files.append((raster, xs, ys, epsg, term))
+    first, ax, ay, ae, at = files[0]
+    second, bx, by, be, bt = files[1]
+    if at != bt:
+        raise ValueError("Scene pair uses incompatible polarization channels")
+    second = _regrid(second, bx, by, be, ax, ay, ae)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        before = 10 * np.log10(np.where(first > 0, first, np.nan))
+        after = 10 * np.log10(np.where(second > 0, second, np.nan))
+    valid = np.isfinite(before) & np.isfinite(after)
+    if np.count_nonzero(valid) < 250:
+        raise ValueError("Insufficient overlapping valid radar pixels")
+    delta = after - before
+    selection = valid & (np.abs(delta) >= 3.0)
+    # This detects SAR-brightness changes, NOT proven floods/deforestation.
+    negative = valid & (delta <= -3.0)
+    base = _gray(before)
+    later = _gray(after)
+    strength = np.clip(np.abs(np.where(valid, delta, 0)) / 10, 0, 1)
+    color = np.zeros_like(base, dtype="float32")
+    color[:, :, 0] = np.where(delta > 0, 242, 30)
+    color[:, :, 1] = np.where(delta > 0, 82, 208)
+    color[:, :, 2] = np.where(delta > 0, 168, 250)
+    overlay = np.clip(_gray((before + after) / 2).astype("float32") * (1 - strength[:, :, None] * .72)
+                      + color * strength[:, :, None] * .72, 0, 255)
+    stats = {
+        "mode": "gcov_backscatter_difference",
+        "polarization": at,
+        "valid_pixels": int(np.count_nonzero(valid)),
+        "median_delta_db": round(float(np.median(delta[valid])), 2),
+        "changed_pixel_fraction": round(float(np.mean(selection[valid])), 4),
+        "decreased_pixel_fraction": round(float(np.mean(negative[valid])), 4),
+        "threshold_db": 3,
+        "interpretation": "Difference in calibrated radar backscatter; not an event classification.",
+        "caution": "Moisture, acquisition geometry, and vegetation seasonality can mimic surface change.",
+    }
     return {
-        "id": p.get("fileID") or p.get("sceneName") or "unknown",
-        "date": p.get("startTime"),
-        "processingLevel": p.get("processingLevel"),
-        "track": p.get("pathNumber"),
-        "frame": p.get("frameNumber"),
+        "images": {"before": _png_rgb(base), "after": _png_rgb(later),
+                   "difference": _png_rgb(overlay)},
+        "stats": stats,
+        "method": "Aligned GCOV terrain-corrected gamma0. Difference in dB (10 log10); threshold 3 dB.",
     }
 
 
-def process(features, lat, lon, change):
-    if not features:
-        raise ProcessingError("No compatible published NISAR acquisitions for this location and period")
-    glon, glat = target_coordinates(lat, lon)
-    if change == "ground":
-        measured = read_scene(features[0], change, glon, glat)
-        phase = measured["arr"]
-        good = phase[np.isfinite(phase)]
-        if good.size < 500:
-            raise ProcessingError("Too few valid GUNW pixels after coherence filtering")
-        lo, hi = np.percentile(good, [2, 98])
-        return {
-            "status": "processed", "kind": "gunw_phase", "change": change,
-            "channel": measured["channel"], "layer": measured["layer"], "unit": "radian",
-            "measurements": {
-                "valid_pixels": int(good.size),
-                "median_phase_rad": round(float(np.median(good)), 4),
-                "p10_phase_rad": round(float(np.percentile(good, 10)), 4),
-                "p90_phase_rad": round(float(np.percentile(good, 90)), 4),
-            },
-            "images": {"phase": png_data(phase, lo, hi, PHASE)},
-            "products": [scene_metadata(features[0])],
-            "disclaimer": "Unwrapped phase, not corrected LOS displacement. Atmospheric/ionospheric signals, coherence and reference choice can affect interpretation.",
-            "roi_radius_km": ROI_RADIUS_KM,
-        }
-    if len(features) < 2:
-        raise ProcessingError("Two same-track GCOV acquisitions are required")
-    before = read_scene(features[0], change, glon, glat)
-    after = read_scene(features[1], change, glon, glat)
-    if before["channel"] != after["channel"]:
-        raise ProcessingError("Acquisitions have mismatched GCOV polarizations; cannot compare fairly")
-    a, b = before["arr"], after["arr"]
-    valid = np.isfinite(a) & np.isfinite(b)
-    if int(valid.sum()) < 500:
-        raise ProcessingError("Not enough overlapping valid NISAR pixels for before/after")
-    a = np.where(valid, a, np.nan)
-    b = np.where(valid, b, np.nan)
-    diff = b - a
-    all_vals = np.concatenate((a[valid], b[valid]))
-    lo, hi = np.percentile(all_vals, [2, 98])
-    difference_max = max(float(np.percentile(abs(diff[valid]), 95)), 1.5)
+def process_gunw(scene: dict, lat: float, lon: float):
+    with open_remote_h5(scene["url"]) as f:
+        stem = "/science/LSAR/GUNW/grids/frequencyA/unwrappedInterferogram"
+        polarizations = [p for p in ("HH", "VV") if stem + "/" + p + "/unwrappedPhase" in f]
+        if not polarizations:
+            raise ValueError("No GUNW unwrapped phase in this product")
+        pol = polarizations[0]
+        phase, xs, ys, epsg = _extract(f, stem + "/" + pol + "/unwrappedPhase", lon, lat)
+        coh_path = stem + "/" + pol + "/coherenceMagnitude"
+        if coh_path in f:
+            coh, cx, cy, ce = _extract(f, coh_path, lon, lat)
+            coh = _regrid(coh, cx, cy, ce, xs, ys, epsg)
+        else:
+            coh = np.ones_like(phase)
+    valid = np.isfinite(phase) & (coh >= .35)
+    if int(np.count_nonzero(valid)) < 120:
+        raise ValueError("Too few coherent GUNW pixels at this point")
+    relative = np.where(valid, phase - np.median(phase[valid]), np.nan)
+    # Wrapped phase colors reveal spatial variation without claiming corrected LOS displacement.
+    wrapped = np.mod(np.where(valid, relative, 0) + pi, 2 * pi) / (2 * pi)
+    rgb = np.stack([
+        100 + 155 * np.cos(wrapped * 2 * pi),
+        110 + 125 * np.sin(wrapped * 2 * pi + 2),
+        110 + 125 * np.sin(wrapped * 2 * pi + 4),
+    ], axis=-1)
+    rgb[~valid] = 18
+    stats = {
+        "mode": "gunw_unwrapped_phase",
+        "polarization": pol,
+        "coherent_pixels": int(np.count_nonzero(valid)),
+        "relative_phase_iqr_rad": round(float(np.percentile(relative[valid], 75)
+                                             - np.percentile(relative[valid], 25)), 3),
+        "interpretation": "Real unwrapped interferometric phase from a paired NISAR observation.",
+        "caution": "Not a corrected displacement map. Atmospheric, ionospheric, orbital and reference-phase corrections are required.",
+    }
     return {
-        "status": "processed", "kind": "gcov_change", "change": change,
-        "channel": before["channel"], "layer": before["layer"], "unit": "dB",
-        "measurements": {
-            "valid_pixels": int(valid.sum()),
-            "median_delta_db": round(float(np.median(diff[valid])), 3),
-            "p10_delta_db": round(float(np.percentile(diff[valid], 10)), 3),
-            "p90_delta_db": round(float(np.percentile(diff[valid], 90)), 3),
-            "pixels_above_3db_absolute_pct": round(float(np.mean(abs(diff[valid]) >= 3) * 100), 2),
-        },
-        "images": {
-            "before": png_data(a, lo, hi, RADAR),
-            "after": png_data(b, lo, hi, RADAR),
-            "difference": png_data(diff, -difference_max, difference_max, DELTA),
-        },
-        "products": [scene_metadata(f) for f in features[:2]],
-        "disclaimer": "Backscatter changes are measured, but do not by themselves prove flooding, fire, or deforestation. Wind, soil moisture, look geometry and seasonal changes can mimic an event.",
-        "roi_radius_km": ROI_RADIUS_KM,
+        "images": {"difference": _png_rgb(np.clip(rgb, 0, 255))},
+        "stats": stats,
+        "method": "GUNW unwrapped phase (radians), masked where coherence <0.35.",
     }
