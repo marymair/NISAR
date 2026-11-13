@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ZORI · Earth Dance Observatory — NASA Space Apps 2026</title>
+<title>ZORI · Earth Dance Observatory</title>
 <meta name="description" content="Explore how NISAR radar observes Earth with ZORI, your alien science guide.">
 <meta name="theme-color" content="#071225">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,46 +21,6 @@
 </script>
 </head>
 <body data-screen="intro">
-
-<!-- ===== ZORI the alien (reusable symbol; colors follow the current accent) ===== -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <defs>
-    <radialGradient id="zshine" cx="35%" cy="25%" r="70%">
-      <stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <symbol id="zori" viewBox="0 0 140 170">
-    <!-- antennae -->
-    <g stroke="var(--accent)" stroke-width="4" stroke-linecap="round" fill="none"><path d="M52 26 Q44 8 36 6"/><path d="M88 26 Q96 8 104 6"/></g>
-    <circle cx="35" cy="6" r="6" fill="var(--accent-2)"/><circle cx="105" cy="6" r="6" fill="var(--accent-2)"/>
-    <!-- ear fins -->
-    <ellipse cx="22" cy="58" rx="16" ry="9" transform="rotate(-28 22 58)" fill="var(--accent)" opacity=".85"/>
-    <ellipse cx="118" cy="58" rx="16" ry="9" transform="rotate(28 118 58)" fill="var(--accent)" opacity=".85"/>
-    <!-- arms: left waves, right points -->
-    <path d="M42 134 Q18 126 10 100" stroke="var(--accent)" stroke-width="10" stroke-linecap="round" fill="none"/>
-    <circle cx="10" cy="97" r="8" fill="var(--accent)"/>
-    <path d="M98 134 Q122 142 132 130" stroke="var(--accent)" stroke-width="10" stroke-linecap="round" fill="none"/>
-    <circle cx="134" cy="128" r="8" fill="var(--accent)"/>
-    <!-- suit + collar + badge -->
-    <path d="M34 130 Q70 108 106 130 L114 168 L26 168Z" fill="var(--accent-2)"/>
-    <path d="M52 120 Q70 136 88 120 L84 112 Q70 124 56 112Z" fill="#f9a8d4"/>
-    <circle cx="70" cy="150" r="6" fill="#f9a8d4"/>
-    <!-- head -->
-    <ellipse cx="70" cy="68" rx="48" ry="46" fill="var(--accent)"/>
-    <ellipse cx="70" cy="68" rx="48" ry="46" fill="url(#zshine)"/>
-    <!-- glossy eyes (blink) -->
-    <ellipse cx="50" cy="72" rx="15" ry="20" transform="rotate(-12 50 72)" fill="#0a0b1e">
-      <animate attributeName="ry" values="20;20;2;20;20" keyTimes="0;.9;.93;.96;1" dur="5s" repeatCount="indefinite"/>
-    </ellipse>
-    <ellipse cx="90" cy="72" rx="15" ry="20" transform="rotate(12 90 72)" fill="#0a0b1e">
-      <animate attributeName="ry" values="20;20;2;20;20" keyTimes="0;.9;.93;.96;1" dur="5s" repeatCount="indefinite"/>
-    </ellipse>
-    <ellipse cx="45" cy="62" rx="5" ry="7" fill="#fff"/><ellipse cx="85" cy="62" rx="5" ry="7" fill="#fff"/>
-    <circle cx="56" cy="82" r="2.5" fill="#9bd7ff"/><circle cx="96" cy="82" r="2.5" fill="#9bd7ff"/>
-    <!-- smile -->
-    <path d="M56 98 Q70 114 84 98 Q70 104 56 98Z" fill="#0a0b1e"/>
-  </symbol>
-</svg>
 
 <!-- ===== alien laboratory background (filled by app.js) ===== -->
 <div class="lab-bg" id="lab-bg" aria-hidden="true"></div>
@@ -165,7 +125,7 @@
     </section>
 
     <div class="foot" style="padding-bottom:20px" data-i18n="foot"></div>
-    <p class="made" style="padding-bottom:40px" data-i18n="made">Made for NASA Space Apps Challenge 2026</p>
+    <p class="made" style="padding-bottom:40px" data-i18n="made">An independent Earth observation learning project</p>
   </div>
 </section>
 
