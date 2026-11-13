@@ -1,4 +1,12 @@
+/* ============ config.js ============
+   The site WORKS WITHOUT the backend (it searches the NASA/ASF archive directly).
+   The backend is optional: it adds LIVE ground-motion processing (interferogram) for the
+   "Ground motion" type. Leave BACKEND_URL empty ("") to switch it off.
+
+   SECURITY: everything in this file is public once the site is online.
+   Do not rely on API_KEY as a secret: restrict the backend (CORS: only your site address,
+   request limits, budget alert in Google Cloud) and rotate the key if it leaked. */
 window.NISAR_CONFIG = {
-    BACKEND_URL: "https://nisar-backend-330055874590.us-central1.run.app",
-    API_KEY: "eyJ0eXAiOiJKV1QiLCJvcmlnaW4iOiJFYXJ0aGRhdGEgTG9naW4iLCJzaWciOiJlZGxqd3RwdWJrZXlfb3BzIiwiYWxnIjoiUlMyNTYifQ.eyJ0eXBlIjoiVXNlciIsInVpZCI6Im1hcnlyeWJhMDAxIiwic3ViIjoibWFyeXJ5YmEwMDEiLCJleHAiOjE3OTk2ODQxODUsImlhdCI6MTc5NDUwMDE4NSwiaXNzIjoiaHR0cHM6Ly91cnMuZWFydGhkYXRhLm5hc2EuZ292IiwiaWRlbnRpdHlfcHJvdmlkZXIiOiJlZGxfb3BzIiwiYWNyIjoiZWRsIiwiYXNzdXJhbmNlX2xldmVsIjozfQ.uw6Y1RU5kuoOkXr5dky2vWF99qZjIluXZreAIDbha7Gaj4i89WX0WxcSfY-IabI9G2a9R9EvoEw7hf6i0023jlqAfn_IIRCPmQe175oAq9LSyWzMgAeDMNE3gfs1Td6Qyrrdw4ca6g3KKi8an7_zntSYnMzpetTHK77LjtvOHKLxtQKkJoo_hilxKfSDyDMoSNvYPiYbPil8pJzbCkbx4Rg4TAG1bHI7pbs-ACr8a8ylSJKXRqTJ0ytP-cW5RUwqBhQ0PEPo-CFhTk0_15IbJQGcSua-7gW5sRi-3bSt1kxzZoQFoUr8rNNf6f9trE43j-ExHQy8VgAo0-FnxYZV3w"
+  BACKEND_URL: "https://nisar-backend-330055874590.us-central1.run.app",
+  API_KEY: "PUT_YOUR_NEW_KEY_HERE"
 };
