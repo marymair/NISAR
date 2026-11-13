@@ -437,6 +437,8 @@ function renderResult() {
   if (s) {
     title = s.title[state.lang] || s.title.en;
     extra = `<p>${esc(s.text[state.lang] || s.text.en)}</p><p class="credit">${esc(t('c.credit'))}: ${esc(s.credit)}</p>`;
+    if (s.sourceUrl) extra += `<p><a class="btn" href="${esc(s.sourceUrl)}" target="_blank" rel="noopener noreferrer">${esc(t('live.storylink'))}</a></p>`;
+    extra += `<p class="note">${esc(t('live.curated'))}</p>`;
     if (s.before && s.after) media = compareHTML(s.before, s.after, t('r.before'), t('r.after'));
     else if (s.image) media = `<img class="single" src="${esc(s.image)}" alt="${esc(title)}">`;
   } else {
@@ -522,7 +524,9 @@ function renderCases() {
 function openSample(id) {
   const s = SAMPLES.find(x => x.id === id); if (!s) return;
   if ($('#app').hidden) { $('#intro').hidden = true; $('#app').hidden = false; document.body.dataset.screen = 'app'; initMap(); }
-  showView('mission'); setChange(s.type);
+  showView('mission');
+  if (s.from && s.to) { state.range = { from: s.from, to: s.to }; syncDateInputs(); }
+  setChange(s.type);
   whenMapReady(() => { showOverlay(s.overlay); });
   selectPoint(new maplibregl.LngLat(s.lng, s.lat), { sample: s, zoom: s.zoom });
   setTimeout(() => $('#result').scrollIntoView({ behavior: 'smooth', block: 'start' }), 900);
