@@ -23,6 +23,9 @@ const dom = new JSDOM(html, {
 const { window: win } = dom;
 win.matchMedia ||= () => ({ matches: false, addListener() {}, removeListener() {} });
 win.scrollTo = () => {};
+// Old preferences must not override the English/dark first impression.
+win.localStorage.setItem('zori.lang', 'it');
+win.localStorage.setItem('zori.theme', 'light');
 
 const sources = [
   'i18n.js',
@@ -31,6 +34,7 @@ const sources = [
   'i18n-it.js',
   'samples.js',
   'case-data.js',
+  'i18n-nl.js',
   'config.js',
   'app.js',
   'zori.js'
@@ -56,6 +60,9 @@ try {
 const doc = win.document;
 const text = id => doc.querySelector(id)?.textContent?.trim() || '';
 assert.equal(errors.length, 0, errors.join('\n'));
+assert.equal(doc.documentElement.lang, 'en', 'English must be the startup language despite old browser preferences');
+assert.equal(doc.documentElement.dataset.theme, 'dark', 'Dark mode must always be the initial theme');
+
 assert.ok(text('.hero .lead').length > 40, 'Hero lead must have localized text');
 assert.ok(text('#intro .logline').length > 10, 'Transmission log must be populated');
 assert.equal(doc.querySelectorAll('#intro-cases .case-card').length, 2, 'Only two archived NASA science cases appear');
@@ -77,6 +84,17 @@ assert.equal(doc.querySelector('#btn-base'), null, 'Only globe and flat map cont
 assert.ok(doc.querySelector('#lang-menu [data-lang="it"]'), 'Italian must be available');
 assert.ok(text('#signal-text'), 'Signal of day must be populated');
 assert.ok(text('#zori-text'), 'ZORI speech must be populated');
+
+const dutch = doc.querySelector('#lang-menu [data-lang="nl"]');
+assert.ok(dutch, 'Dutch must appear in the language menu');
+dutch.click();
+assert.equal(doc.documentElement.lang, 'nl', 'Switching to Dutch must change the page language');
+assert.match(text('.hero h1'), /planeet ontdekt/i, 'Dutch hero title renders');
+assert.match(text('.hero .mission-attribution'), /NASA en ISRO/, 'Dutch NASA–ISRO attribution renders');
+assert.match(doc.querySelector('#cases-grid .reading-guide > summary').textContent, /Hoe lees je deze beelden/, 'Dutch radar reading guide renders');
+assert.match(text('#cases-grid .case-summary h2'), /Venezuela|Mozambique/, 'Dutch case names render');
+assert.ok(doc.querySelector('#lang-menu [data-lang="nl"][aria-checked="true"]'), 'Dutch language selection is visibly active');
+assert.equal(doc.querySelectorAll('#cases-grid .compare-group').length, 2, 'Dutch translation must preserve both genuine radar sliders');
 
 const italian = doc.querySelector('#lang-menu [data-lang="it"]');
 italian.click();
