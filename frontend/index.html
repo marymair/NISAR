@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="lab.css">
 <link rel="stylesheet" href="alien-upgrade.css">
+<link rel="stylesheet" href="mission-polish.css">
 <script>
   try {
     var th = localStorage.getItem('zori.theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
@@ -45,6 +46,7 @@
       <button role="menuitemradio" data-lang="ru" aria-checked="false">Русский</button>
       <button role="menuitemradio" data-lang="es" aria-checked="false">Español</button>
       <button role="menuitemradio" data-lang="fr" aria-checked="false">Français</button>
+      <button role="menuitemradio" data-lang="it" aria-checked="false">Italiano</button>
       <button disabled aria-disabled="true">👽 ALIEN <span class="badge" data-i18n="lang.soon">Coming soon</span></button>
     </div>
     <button class="icon-btn" id="theme-toggle" aria-label="Toggle dark / light theme" aria-pressed="false">◐</button>
@@ -172,7 +174,7 @@
             <input id="search" type="search" data-i18n-ph="m.search" placeholder="Search a place…" aria-label="Search a place">
           </form>
           <button class="icon-btn" id="btn-proj" type="button">🌍 <span>Flat map</span></button>
-          <button class="icon-btn" id="btn-base" type="button">🛰 <span>Satellite</span></button>
+          
         </div>
         <div class="map-hint" data-i18n="m.hint"></div>
         <div class="scanner" id="scanner" aria-hidden="true"><div class="sweep"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
@@ -193,7 +195,7 @@
           <p class="sub" id="status-detail" style="margin:10px 0 0;font-size:.88rem"></p>
         </div>
         <div class="card actions">
-          <button class="btn primary" id="analyze" disabled data-i18n="a.btn">Show the most significant changes</button>
+          <button class="btn primary" id="analyze" disabled data-i18n="a.btn">Analyze this place</button>
           <p class="why" id="analyze-why"></p>
           <button class="btn" id="copy" disabled data-i18n="a.copy">Copy link</button>
         </div>
@@ -276,6 +278,7 @@
 <script src="i18n.js"></script>
 <script src="i18n-extra.js"></script>
 <script src="science-i18n.js"></script>
+<script src="i18n-it.js"></script>
 <script src="samples.js"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
