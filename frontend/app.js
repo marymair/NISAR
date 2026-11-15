@@ -404,7 +404,8 @@ async function liveAnalyze() {
         jobId: j.job_id, stats: s.stats || {},
         sources: s.sources || [], method: s.method,
         beforeImg: full('before'), afterImg: full('after'),
-        diffImg: full('difference'), img: full('difference')
+        diffImg: full('difference'), img: full('difference'),
+        coherenceImg: full('coherence')
       };
     }
     if (s.status === 'error') throw new Error(s.error || 'Processing error');
@@ -523,9 +524,15 @@ function scienceVisual(data) {
       esc(diff) + '" alt="' + esc(t('r.diff')) + '"><figcaption>' +
       esc(t('live.visualdifference')) + '</figcaption></figure>';
   }
-  if (data.image || data.img) {
+  if ((data.coherence || data.coherenceImg) && (data.image || data.img || diff)) {
+    const phase = data.image || data.img || diff;
+    const coherence = data.coherence || data.coherenceImg;
+    return compareHTML(coherence, phase, t('case.coherence'), t('case.phaseShort')) +
+      '<p class="science-product-note">' + esc(t('case.phaseCompare')) + '</p>';
+  }
+  if (data.image || data.img || diff) {
     return '<figure class="phase-product"><img class="single" loading="lazy" src="' +
-      esc(data.image || data.img) + '" alt="' + esc(t('case.phase')) +
+      esc(data.image || data.img || diff) + '" alt="' + esc(t('case.phase')) +
       '"><figcaption>' + esc(t('case.phase')) + '</figcaption></figure>';
   }
   return '<p class="scan-error">' + esc(t('case.notReady')) + '</p>';
