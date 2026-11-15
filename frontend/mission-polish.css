@@ -50,7 +50,7 @@
 @keyframes zori-cheer { from { transform: rotate(-10deg); } to { transform: rotate(17deg); } }
 @keyframes zori-worry { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
 @keyframes zori-sleepy { 0%,100% {transform:rotate(-5deg)} 50% {transform:rotate(5deg)} }
-#zori-widget { z-index: 54; }
+#zori-widget { z-index: 54; flex-direction: row-reverse; }
 #zori-widget .face { touch-action: none; cursor: grab; opacity: 1 !important; }
 #zori-widget .face:active { cursor: grabbing; }
 #zori-widget .face svg { opacity: 1 !important; }
