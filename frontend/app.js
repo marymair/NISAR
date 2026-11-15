@@ -316,6 +316,18 @@ function levelSummary() {
   state.scenes.forEach(s => { const l = s.processingLevel || '?'; c[l] = (c[l] || 0) + 1; });
   return Object.entries(c).map(([k, v]) => `${k}×${v}`).join(', ');
 }
+function hasScienceInputs() {
+  if (state.change === 'ground') return state.scenes.some(s => String(s.processingLevel || '').toUpperCase().includes('GUNW'));
+  const groups = new Map();
+  for (const s of state.scenes) {
+    if (String(s.processingLevel || '').toUpperCase() !== 'GCOV') continue;
+    if (s.pathNumber == null || s.frameNumber == null) continue;
+    const key = [s.pathNumber,s.frameNumber,s.flightDirection,s.dataMaturity].join('|');
+    if (!groups.has(key)) groups.set(key, new Set());
+    groups.get(key).add(String(s.startTime || '').slice(0,10));
+  }
+  return [...groups.values()].some(dates => dates.size >= 2);
+}
 function refreshPanel() {
   const p = state.point;
   $('#p-name').textContent = !p ? t('p.idle') : (state.place ? (state.place.name || t('p.unknown')) : '…');
@@ -338,6 +350,7 @@ function refreshPanel() {
   else if (state.status === 'checking') why = t('s.checking');
   else if (state.polarOutside) why = t('a.polar');
   else if (state.status !== 'found') why = t('a.needData');
+  else if (!hasScienceInputs()) why = t('a.needPair');
   $('#analyze').disabled = !!why; $('#analyze-why').textContent = why;
   $('#copy').disabled = !p;
 }
@@ -398,7 +411,8 @@ async function liveAnalyze() {
   throw new Error('Analysis timed out');
 }
 async function runScan() {
-  if (!state.point || state.status !== 'found' || state.polarOutside) { zoriSay(t('a.needData')); return; }
+  const scanSelection = reqId;
+  if (!state.point || state.status !== 'found' || state.polarOutside || !hasScienceInputs()) { zoriSay(t('a.needData')); return; }
   const sc = $('#scanner'); const pt = map.project([state.point.lng, state.point.lat]);
   sc.style.left = pt.x + 'px'; sc.style.top = pt.y + 'px';
   sc.classList.add('on'); scanMsg(t('scan.text'));
@@ -409,6 +423,7 @@ async function runScan() {
     try { live = await liveAnalyze(); } catch (e) { console.warn('live analysis failed:', e); liveFailed = true; liveError = String(e.message || e).slice(0, 220); }
   } else await sleep(300);
   sc.classList.remove('on'); scanMsg('');
+  if (scanSelection !== reqId) return; // Do not attach an earlier scan to a newly selected place.
   buildReport(live, liveFailed, liveError); renderResult();
   window.setZoriEmotion?.(live ? 'excited' : (liveFailed ? 'worried' : 'curious'));
   $('#result').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -519,6 +534,16 @@ function renderResult() {
   $('#explain-btn', el).onclick = openExplain;
   const cmp = $('.compare', el);
   if (cmp) {
+    $('.compare img', el).forEach(img => {
+      img.onerror = () => {
+        if (!cmp.isConnected) return;
+        const info = document.createElement('p');
+        info.className = 'scan-error';
+        info.textContent = t('live.imageexpired');
+        cmp.replaceWith(info);
+      };
+    });
+
     $('input[type=range]', cmp).addEventListener('input', e => cmp.style.setProperty('--pos', e.target.value + '%'));
     $$('.seg button', el).forEach(b => b.addEventListener('click', () => {
       $$('.seg button', el).forEach(x => x.setAttribute('aria-pressed', String(x === b)));
