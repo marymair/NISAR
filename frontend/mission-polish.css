@@ -125,3 +125,62 @@ html[data-theme="light"] #result .compare-slider-row { background: #eaf5ff;
   #result .compare-slider-row { padding: 9px 10px; gap: 8px; }
   #result .compare-slider-row span { font-size: .8rem; }
 }
+
+/* Curated Cases are genuine, precomputed NISAR analysis cards, not outside photos. */
+#view-cases #cases-grid {
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px;
+  margin-top: 20px;
+}
+#view-cases .case-feature {
+  display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(280px, .9fr);
+  gap: clamp(18px, 3vw, 34px);
+  padding: clamp(16px, 2.6vw, 28px);
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--line));
+  background: var(--panel-solid); text-align: left;
+  cursor: default; width: 100%;
+}
+#view-cases .case-feature:hover { transform: none; }
+#view-cases .case-media, #view-cases .case-summary { min-width: 0; }
+#view-cases .case-feature h2 { font-size: clamp(1.35rem, 2.3vw, 1.9rem); margin-bottom: 18px; }
+#view-cases .case-feature p { line-height: 1.65; }
+#view-cases .case-feature p strong { color: var(--accent); }
+#view-cases .case-feature .case-type { display: inline-block; margin-bottom: 12px; color: var(--accent);
+  font-family: var(--font-d); font-weight: 800; letter-spacing: .05em; font-size: .8rem; }
+#view-cases .case-feature .case-measure, #result .case-measure {
+  padding: 11px 14px; border-radius: 12px; background: color-mix(in srgb,var(--accent) 9%,var(--panel-solid));
+  border: 1px solid var(--line); font-size: .92rem;
+}
+#view-cases .case-feature .compare-group { margin: 0 0 12px; }
+#view-cases .case-feature .compare, #view-cases .case-feature .compare img { max-height: 460px; }
+#view-cases .case-feature .compare { --pos: 50%; isolation: isolate;
+  position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: #010c16;
+  border: 2px solid var(--accent); border-radius: 15px; }
+#view-cases .case-feature .compare img { pointer-events: none; -webkit-user-drag: none; }
+#view-cases .case-feature .compare .c-handle {
+  left: var(--pos); z-index: 3; width: 3px; background: white;
+  box-shadow: 0 0 0 1px var(--accent),0 0 15px var(--accent);
+}
+#view-cases .case-feature .compare .c-grip { position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%); width: 60px; height: 50px; border-radius: 30px;
+  display: grid; place-items: center; background: var(--accent); color: #03132a;
+  border: 3px solid white; font-weight: 900;
+}
+#view-cases .case-feature .compare .compare-overlay { z-index: 6; position: absolute; inset: 0;
+  width: 100%; height: 100%; opacity: 0; touch-action: pan-y; cursor: ew-resize; }
+#view-cases .case-feature .compare .c-tag { z-index: 5; font-weight: 800; }
+#view-cases .case-feature .compare-slider-row {
+  display: flex; align-items: center; gap: 12px; margin-top: 12px;
+  padding: 12px 16px; background: var(--panel-solid); border: 1px solid var(--line);
+  border-radius: 14px;
+}
+#view-cases .case-feature .compare-slider-row span { color: var(--accent); font-weight: 800; white-space: nowrap; }
+#view-cases .case-feature .compare-slider-row input { min-width: 0; width: 100%;
+  flex: 1; opacity: 1; accent-color: var(--accent); cursor: ew-resize; }
+#view-cases .case-feature .case-diff { margin-top: 16px; }
+#view-cases .case-feature figure { margin: 0; }
+#view-cases .case-feature img.single { width: 100%; height: auto; max-height: 490px; object-fit: contain; }
+html[data-theme="light"] #view-cases .case-feature { background: rgba(247,252,255,.97);
+  border-color: rgba(28,111,185,.42); }
+@media (max-width: 850px) {
+  #view-cases .case-feature { grid-template-columns: 1fr; }
+}
