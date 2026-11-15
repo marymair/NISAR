@@ -108,7 +108,7 @@ function startNotes() {
   const arr = I18N[state.lang].notes;
   noteIdx = Math.floor(Math.random() * arr.length);
   zoriSay(arr[noteIdx]);
-  noteTimer = setInterval(() => { noteIdx = (noteIdx + 1) % arr.length; zoriSay(I18N[state.lang].notes[noteIdx]); }, 18000);
+  noteTimer = setInterval(() => { if (!$('#zori-widget').classList.contains('open')) return; noteIdx = (noteIdx + 1) % arr.length; zoriSay(I18N[state.lang].notes[noteIdx]); }, 30000);
 }
 function renderSignal() {
   const arr = I18N[state.lang].signals;
@@ -530,7 +530,7 @@ function renderResult() {
         ${list ? `<details><summary>${esc(t('r.scenes'))}</summary><ul class="scene-list">${list}</ul></details>` : ''}
       </div>
     </div>`;
-  $$('img.single', el).forEach(i => { i.onerror = () => { i.replaceWith(Object.assign(document.createElement('p'), { className: 'note', textContent: '⚠ ' + (i.getAttribute('src') || 'image') })); }; });
+  $('img.single', el).forEach(i => { i.onerror = () => { const n = document.createElement('p'); n.className = 'scan-error'; n.textContent = t('live.imageexpired'); i.replaceWith(n); }; });
   $('#explain-btn', el).onclick = openExplain;
   const cmp = $('.compare', el);
   if (cmp) {
