@@ -696,8 +696,8 @@ function renderCases() {
           ${dates ? `<p class="credit">${esc(t('case.satellite'))}: ${dates}</p>` : ''}
           ${caseMetric(s) ? `<p class="case-measure">${esc(caseMetric(s))}</p>` : ''}
           ${s.sources?.length ? `<details><summary>${esc(t('live.sources'))}</summary><ul class="scene-list">${s.sources.map(x => `<li>${esc(x.id)} · ${esc(String(x.date || '').slice(0, 10))}</li>`).join('')}</ul></details>` : ''}
-          <p class="credit"><a href="${esc(s.sourceUrl)}" target="_blank" rel="noopener noreferrer">${esc(t('case.scienceSource'))}</a></p>
-          <button class="btn primary" type="button" data-sample="${esc(s.id)}">${esc(t('case.inspect'))}</button>
+          <details class="science-disclosure"><summary>${esc(t('r.science'))}</summary><p class="note">${esc(t('r.trustd'))}</p><p><a href="${esc(s.sourceUrl)}" target="_blank" rel="noopener noreferrer">${esc(t('case.scienceSource'))}</a></p><p><a href="https://search.asf.alaska.edu/#/?dataset=NISAR" target="_blank" rel="noopener noreferrer">${esc(t('guide.source'))}</a></p></details>
+          <div class="case-actions"><button class="btn primary" type="button" data-sample="${esc(s.id)}">${esc(t('case.inspect'))}</button><button class="btn" type="button" data-open-lab>${esc(t('guide.lab'))}</button></div>
         </div>
       </article>`;
   }).join('') : `<div class="card case-empty"><p>${esc(t('case.noArchive'))}</p></div>`;
