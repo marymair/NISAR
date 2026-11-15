@@ -184,3 +184,38 @@ html[data-theme="light"] #view-cases .case-feature { background: rgba(247,252,25
 @media (max-width: 850px) {
   #view-cases .case-feature { grid-template-columns: 1fr; }
 }
+
+
+/* Final submission: live analysis uses exactly the same two-column scientific
+   card arrangement as verified archived examples, without placeholder images. */
+#result .unified-science-report { display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(290px, .9fr);
+  gap: clamp(18px, 3vw, 34px); align-items: start; }
+#result .unified-science-report .case-media,
+#result .unified-science-report .case-summary { min-width: 0; }
+#result .unified-science-report .case-type { display: inline-block; margin-bottom: 12px;
+  color: var(--accent); font-weight: 800; letter-spacing: .055em; font-size: .8rem; }
+#result .unified-science-report .case-summary p { line-height: 1.65; margin: 0 0 17px; }
+#result .unified-science-report .case-summary p strong { color: var(--accent); }
+#result .unified-science-report .case-summary .credit { color: var(--muted); font-size: .86rem; }
+#result .unified-science-report .case-summary .case-measure { margin: 14px 0 18px; }
+#result .unified-science-report .live-difference,
+#view-cases .case-feature .live-difference { margin: 18px 0; }
+#result .unified-science-report .live-difference img,
+#view-cases .case-feature .live-difference img,
+#result .unified-science-report .phase-product img { display: block;
+  width: 100%; height: auto; max-height: 480px; object-fit: contain; }
+#result .unified-science-report .live-difference figcaption,
+#view-cases .case-feature .live-difference figcaption { margin: 9px 3px 0; }
+#result .unified-science-report .result-actions { display: flex; flex-wrap: wrap;
+  gap: 9px; margin-top: 18px; }
+#result .unified-science-report .result-actions a { text-decoration: none; }
+#result .unified-science-report .compare-group,
+#view-cases .case-feature .compare-group { width: 100%; }
+#view-cases .case-empty { max-width: 680px; padding: 22px 28px; }
+#view-cases .case-empty p { margin: 0; line-height: 1.6; }
+html[data-theme="light"] #result .unified-science-report .case-media,
+html[data-theme="light"] #result .unified-science-report .case-summary { color: #18324b; }
+@media (max-width: 900px) {
+  #result .unified-science-report { grid-template-columns: minmax(0, 1fr); }
+}
