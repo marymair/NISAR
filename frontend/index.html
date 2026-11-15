@@ -61,9 +61,10 @@
 
     <div class="hero">
       <div>
-        <p class="transmit" data-i18n="intro.eyebrow">Incoming transmission</p>
+        <p class="transmit" data-i18n="intro.eyebrow">URGENT TRANSMISSION FROM GALACTIC SPACE</p>
         <h1 data-i18n="intro.title">We found a planet that never stops dancing</h1>
-        <p class="lead" data-i18n="intro.lead">Aliens have spotted Earth. Its surface keeps changing: water rises, forests burn, the ground shakes. Join ZORI and read these changes with radar data from the NISAR satellite.</p>
+        <p class="lead" data-i18n="intro.lead">Aliens have spotted Earth. Its surface keeps changing: water rises, forests burn, the ground shakes. Join ZORI and read these changes using radar data from the NISAR satellite.</p>
+        <p class="mission-attribution" data-i18n="intro.credit">NISAR is a real NASA–ISRO satellite mission. ZORI is our fictional alien explorer explaining its open scientific data.</p>
 
         <div class="card log">
           <h3 data-i18n="story.title">Transmission log</h3>
@@ -81,7 +82,16 @@
 
       <div>
         <div class="hero-zori" aria-hidden="true"><div class="zori-avatar" data-zori-avatar data-emotion="happy"></div><span class="zori-orbit"></span></div>
-        <div class="porthole" role="img" aria-label="Earth seen through the laboratory window"><div class="earth"></div></div>
+        <div class="porthole" role="img" aria-label="Stylized Earth with recognizable continents under alien radar observation">
+          <div class="earth"></div>
+          <div class="earth-scanner" aria-hidden="true"></div>
+          <span class="earth-ping earth-ping-one" aria-hidden="true"></span>
+          <span class="earth-ping earth-ping-two" aria-hidden="true"></span>
+          <span class="earth-crosshair" aria-hidden="true"></span>
+        </div>
+        <div class="orbit-telemetry" aria-hidden="true">
+          <span>◉ NISAR · L-BAND</span><span>📡 SAR ECHO</span><span>⟐ NASA · ISRO</span>
+        </div>
         <div class="card signal">
           <h3 data-i18n="signal.title">Earth Signal of the Day</h3>
           <div class="date" id="signal-date"></div>
@@ -235,6 +245,7 @@
         <details><summary data-i18n="l.insar.t"></summary><p data-i18n="l.insar.d"></p></details>
         <details><summary data-i18n="l.prod.t"></summary><p data-i18n="l.prod.d"></p></details>
         <details><summary data-i18n="l.trust.t"></summary><p data-i18n="l.trust.d"></p></details>
+        <details class="lab-archive"><summary data-i18n="lab.archive.t">Original data and ASF Vertex</summary><p data-i18n="lab.archive.d">ZORI processes real NASA–ISRO NISAR science granules from the Alaska Satellite Facility archive.</p><p><a class="btn lab-source-link" href="https://search.asf.alaska.edu/#/?dataset=NISAR" target="_blank" rel="noopener noreferrer" data-i18n="lab.archive.link">Browse NASA ASF NISAR archive</a></p></details>
       </div>
       <div class="foot" data-i18n="foot"></div>
     </div>
