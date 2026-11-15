@@ -37,10 +37,10 @@
   window.setZoriEmotion = setEmotion;
   setEmotion('happy');
   let clickMood=0;
-  let suppressClick = false;
+  let suppressClickUntil = 0;
   document.addEventListener('click', e => {
     if (!e.target.closest('#zori-face')) return;
-    if (suppressClick) { e.stopImmediatePropagation(); e.preventDefault(); suppressClick = false; return; }
+    if (performance.now() < suppressClickUntil) { e.stopImmediatePropagation(); e.preventDefault(); return; }
     clickMood = (clickMood + 1) % moods.length;
     setEmotion(moods[clickMood]);
   }, true);
@@ -71,7 +71,7 @@
     });
     const finishDrag = e => {
       if (!start || e.pointerId !== start.pointerId) return;
-      suppressClick = start.dragged;
+      suppressClickUntil = start.dragged ? performance.now() + 350 : 0;
       start = null;
     };
     grip.addEventListener('pointerup', finishDrag);
