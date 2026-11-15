@@ -165,3 +165,10 @@ Object.assign(I18N.it, {
  'case.scanUnavailable': 'Nessuna immagine radar verificata prodotta qui. Prova altre date o un altro luogo.',
  'case.noConfirmedEvent': 'L’analisi non è stata completata; l’evento non può essere confermato.'
 });
+
+
+Object.assign(I18N.it, {
+ 'case.coherence': 'Coerenza',
+ 'case.phaseShort': 'Fase',
+ 'case.phaseCompare': 'Trascina per confrontare la coerenza misurata con la fase interferometrica della stessa coppia NISAR. Non sono foto prima/dopo né una mappa di spostamento corretta.'
+});
