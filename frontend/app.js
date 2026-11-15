@@ -451,12 +451,24 @@ function buildReport(live, liveFailed, liveError = '') {
 
 /* ---------- result card ---------- */
 function compareHTML(a, b, la, lb) {
-  return `<div class="compare" style="--pos:50%">
-      <img src="${esc(a)}" alt="${esc(la)}"><img class="c-after" src="${esc(b)}" alt="${esc(lb)}">
+  // Both images occupy the exact same frame. The overlay and the visible slider
+  // share --pos; either a mouse, touch, or keyboard can reveal before/after.
+  return `<div class="compare-group">
+    <div class="compare" style="--pos:50%">
+      <img src="${esc(a)}" alt="${esc(la)}" draggable="false">
+      <img class="c-after" src="${esc(b)}" alt="${esc(lb)}" draggable="false">
       <span class="c-tag l">${esc(la)}</span><span class="c-tag r">${esc(lb)}</span>
-      <div class="c-handle"></div><input type="range" min="0" max="100" value="50" aria-label="${esc(t('r.slide'))}">
+      <div class="c-handle" aria-hidden="true"><span class="c-grip">◀ ▶</span></div>
+      <input class="compare-overlay" type="range" min="0" max="100" value="50"
+        aria-label="${esc(t('r.slide'))}: ${esc(la)} / ${esc(lb)}">
     </div>
-    <div class="seg" role="group"><button data-mode="slide" aria-pressed="true">${esc(t('r.slide'))}</button><button data-mode="diff" aria-pressed="false">${esc(t('r.diff'))}</button></div>`;
+    <div class="compare-slider-row">
+      <span>${esc(la)}</span>
+      <input class="compare-range" type="range" min="0" max="100" value="50"
+        aria-label="${esc(t('r.slide'))}: ${esc(la)} / ${esc(lb)}">
+      <span>${esc(lb)}</span>
+    </div>
+  </div>`;
 }
 function renderResult() {
   const el = $('#result'); const ty = state.change;
@@ -534,21 +546,23 @@ function renderResult() {
   $('#explain-btn', el).onclick = openExplain;
   const cmp = $('.compare', el);
   if (cmp) {
-    $$('.compare img', el).forEach(img => {
+    const group = cmp.closest('.compare-group');
+    $$('.compare img', cmp).forEach(img => {
       img.onerror = () => {
         if (!cmp.isConnected) return;
         const info = document.createElement('p');
         info.className = 'scan-error';
         info.textContent = t('live.imageexpired');
-        cmp.replaceWith(info);
+        group.replaceWith(info);
       };
     });
-
-    $('input[type=range]', cmp).addEventListener('input', e => cmp.style.setProperty('--pos', e.target.value + '%'));
-    $$('.seg button', el).forEach(b => b.addEventListener('click', () => {
-      $$('.seg button', el).forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-      cmp.classList.toggle('diff', b.dataset.mode === 'diff');
-    }));
+    const sliders = $$('input[type=range]', group);
+    const sync = value => {
+      const pos = Math.max(0, Math.min(100, Number(value) || 0));
+      cmp.style.setProperty('--pos', pos + '%');
+      sliders.forEach(slider => { slider.value = String(pos); });
+    };
+    sliders.forEach(slider => slider.addEventListener('input', e => sync(e.target.value)));
   }
   el.hidden = false;
 }
