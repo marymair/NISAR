@@ -42,7 +42,7 @@ const sources = [
 // Browser-only fixture for two saved results; never included in production assets.
 const caseFixture = [
   "Object.assign(SAMPLES.find(s => s.id === 'mozambique'), {precomputed:true, before:'/assets/cases/mozambique-before.png', after:'/assets/cases/mozambique-after.png', difference:'/assets/cases/mozambique-difference.png', sources:[{date:'2026-01-05'},{date:'2026-01-17'}], stats:{median_delta_db:3.72,changed_pixel_fraction:.6156}});",
-  "Object.assign(SAMPLES.find(s => s.id === 'venezuela'), {precomputed:true, image:'/assets/cases/venezuela-difference.png', sources:[{date:'2026-06-30'}], stats:{relative_phase_iqr_rad:1.5}});"
+  "Object.assign(SAMPLES.find(s => s.id === 'venezuela'), {precomputed:true, image:'/assets/cases/venezuela-difference.png', coherence:'/assets/cases/venezuela-coherence.png', sources:[{date:'2026-06-30'}], stats:{relative_phase_iqr_rad:1.5}});"
 ].join('\n');
 const compiledPage = sources
   .map(source => fs.readFileSync(path.join(root, 'frontend', source), 'utf8') +
@@ -61,7 +61,8 @@ assert.ok(text('#intro .logline').length > 10, 'Transmission log must be populat
 assert.equal(doc.querySelectorAll('#intro-cases .case-card').length, 2, 'Only two archived NASA science cases appear');
 assert.equal(doc.querySelectorAll('#cases-grid .case-card').length, 2, 'Incomplete crops case stays hidden');
 assert.equal(doc.querySelectorAll('#cases-grid .case-feature').length, 2, 'Both verified science cases appear');
-assert.equal(doc.querySelectorAll('#cases-grid .compare-group').length, 1, 'GCOV has slider; GUNW phase does not fake before-after');
+assert.equal(doc.querySelectorAll('#cases-grid .compare-group').length, 2, 'GCOV and real GUNW science-layer comparisons both have sliders');
+assert.match(doc.querySelector('#cases-grid').textContent, /Coherence|Когерентность/, 'GUNW comparison uses correct labels, not fake Before/After');
 assert.doesNotMatch(doc.querySelector('#cases-grid').textContent, /Maize Triangle|Кукурузный треугольник/, 'Unprepared South Africa case is hidden');
 assert.match(doc.querySelector('#cases-grid').textContent, /Cause|Причина|Cause and interpretation/);
 assert.equal(doc.querySelectorAll('#cases-grid img[src^="https://"]').length, 0, 'No foreign photographs can appear in case panels');
