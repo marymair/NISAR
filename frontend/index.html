@@ -14,12 +14,8 @@
 <link rel="stylesheet" href="lab.css">
 <link rel="stylesheet" href="alien-upgrade.css">
 <link rel="stylesheet" href="mission-polish.css">
-<script>
-  try {
-    var th = localStorage.getItem('zori.theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-    document.documentElement.dataset.theme = th;
-  } catch (e) {}
-</script>
+<!-- Every new page load begins with English and dark mode. Visitors can
+     switch language and theme without changing this first-impression default. -->
 </head>
 <body data-screen="intro">
 
@@ -47,6 +43,7 @@
       <button role="menuitemradio" data-lang="es" aria-checked="false">Español</button>
       <button role="menuitemradio" data-lang="fr" aria-checked="false">Français</button>
       <button role="menuitemradio" data-lang="it" aria-checked="false">Italiano</button>
+      <button role="menuitemradio" data-lang="nl" aria-checked="false">Nederlands</button>
       <button disabled aria-disabled="true">👽 ALIEN <span class="badge" data-i18n="lang.soon">Coming soon</span></button>
     </div>
     <button class="icon-btn" id="theme-toggle" aria-label="Toggle dark / light theme" aria-pressed="false">◐</button>
@@ -296,6 +293,7 @@
 <script src="i18n-it.js"></script>
 <script src="samples.js"></script>
 <script src="case-data.js"></script>
+<script src="i18n-nl.js"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
 <script src="zori.js"></script>
