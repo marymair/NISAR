@@ -251,3 +251,83 @@ Object.assign(I18N.es, {
  'case.phaseShort': 'Fase',
  'case.phaseCompare': 'Desliza para comparar la coherencia medida con la fase interferométrica de la misma pareja NISAR. No son fotografías antes/después.'
 });
+
+
+/* Final mission narrative and plain-language science guides.
+   NISAR is explicitly the NASA–ISRO satellite, NOT alien-owned hardware. */
+Object.assign(I18N.ru, {
+  'intro.eyebrow': 'СРОЧНОЕ СООБЩЕНИЕ ИЗ ГАЛАКТИЧЕСКОГО ПРОСТРАНСТВА',
+  'intro.title': 'Мы обнаружили планету, которая никогда не перестаёт танцевать',
+  'intro.lead': 'Инопланетяне заметили Землю. Её поверхность постоянно меняется: поднимается вода, горят леса, дрожит земля. Присоединяйся к ZORI и читай эти изменения по радарным данным спутника NISAR.',
+  'intro.credit': 'NISAR — настоящая спутниковая миссия NASA и ISRO. ZORI — вымышленный инопланетный исследователь, который объясняет её открытые данные.',
+  'guide.open': 'Как читать эти снимки',
+  'guide.gcov1': '«Раньше» и «Позже» — радарные наблюдения одного района в две разные даты. Передвигай ползунок, чтобы сравнивать детали.',
+  'guide.gcov2': 'Серые тона показывают силу отражённого сигнала радара. Светлое не всегда значит сушу, а тёмное — воду.',
+  'guide.gcov3': 'Карта «Разница» выделяет места, где радарный сигнал изменился. Порог 3 дБ — ориентир, не граница наводнения.',
+  'guide.phase1': '«Когерентность» показывает, насколько согласован сигнал между наблюдениями: яркие области устойчивее, тёмные менее надёжны.',
+  'guide.phase2': '«Фаза» показывает разность радарной фазы между двумя наблюдениями. Цвета обозначают разницу в радианах, а не напрямую сантиметры смещения.',
+  'guide.phase3': 'Сдвигай ползунок между двумя научными слоями одного набора NISAR. Это не две фотографии «до/после».',
+  'guide.caution': 'Важно: изменения могут зависеть от влажности, растительности и условий съёмки. Для подтверждения события нужны другие данные.',
+  'guide.lab': 'Узнать больше в научной лаборатории',
+  'guide.source': 'Каталог исходных данных NASA ASF Vertex',
+  'lab.archive.t': 'Исходные данные и ASF Vertex',
+  'lab.archive.d': 'ZORI самостоятельно анализирует научные файлы NISAR из каталога Alaska Satellite Facility. ASF Vertex помогает проверить идентификаторы наблюдений, даты и продукты GCOV/GUNW. Каталог не является результатом анализа ZORI.',
+  'lab.archive.link': 'Открыть архив NISAR в ASF Vertex'
+});
+Object.assign(I18N.en, {
+  'intro.eyebrow': 'URGENT TRANSMISSION FROM GALACTIC SPACE',
+  'intro.title': 'We found a planet that never stops dancing',
+  'intro.lead': 'Aliens have spotted Earth. Its surface keeps changing: water rises, forests burn, the ground shakes. Join ZORI and read these changes using radar data from the NISAR satellite.',
+  'intro.credit': 'NISAR is a real NASA–ISRO satellite mission. ZORI is our fictional alien explorer explaining its open scientific data.',
+  'guide.open': 'How to read these images',
+  'guide.gcov1': 'Before and After are radar observations of the same location on different dates. Drag the divider to compare details.',
+  'guide.gcov2': 'Shades of gray show the strength of radar echoes. Bright does not always mean land, and dark does not always mean water.',
+  'guide.gcov3': 'The Difference map highlights where radar backscatter changed. The 3 dB threshold is a reference, not a confirmed flood boundary.',
+  'guide.phase1': 'Coherence shows how consistent the radar response is between acquisitions. Brighter areas are more reliable; darker areas less so.',
+  'guide.phase2': 'Phase shows the difference in radar phase between observations. Colors represent radians, not directly centimeters of ground motion.',
+  'guide.phase3': 'Drag to compare two science layers from the same NISAR dataset. These are not Before/After photographs.',
+  'guide.caution': 'Important: moisture, vegetation and acquisition conditions can also cause changes. Other evidence is needed to confirm an event.',
+  'guide.lab': 'Learn more in the Science Lab',
+  'guide.source': 'NASA ASF Vertex original data catalog',
+  'lab.archive.t': 'Original data and ASF Vertex',
+  'lab.archive.d': 'ZORI processes real NASA–ISRO NISAR products from the Alaska Satellite Facility archive. ASF Vertex lets you inspect granules, acquisition dates and product types. The catalog itself is not a ZORI analysis.',
+  'lab.archive.link': 'Browse NASA ASF NISAR archive'
+});
+Object.assign(I18N.es, {
+  'intro.eyebrow': 'TRANSMISIÓN URGENTE DESDE EL ESPACIO GALÁCTICO',
+  'intro.title': 'Encontramos un planeta que nunca deja de bailar',
+  'intro.lead': 'Los extraterrestres descubrieron la Tierra: sube el agua, cambian los bosques y tiembla el suelo. Explora estos cambios con ZORI y los datos radar del satélite NISAR.',
+  'intro.credit': 'NISAR es una misión satelital real de NASA e ISRO. ZORI es una guía extraterrestre ficticia que explica sus datos.',
+  'guide.open': 'Cómo leer estas imágenes',
+  'guide.gcov1': 'Antes y después son observaciones radar del mismo lugar en distintas fechas. Arrastra la línea para comparar.',
+  'guide.gcov2': 'Los tonos grises indican intensidad del eco radar: oscuro no siempre es agua.',
+  'guide.gcov3': 'Diferencia destaca los cambios de señal. El umbral de 3 dB no es una frontera confirmada de inundación.',
+  'guide.phase1': 'Coherencia indica la consistencia de la señal entre las observaciones; las zonas claras son más fiables.',
+  'guide.phase2': 'Fase representa la diferencia de fase radar en radianes, no desplazamiento medido directamente.',
+  'guide.phase3': 'Compara dos capas científicas de una pareja NISAR; no son fotografías antes/después.',
+  'guide.caution': 'La humedad, la vegetación y las condiciones de adquisición también influyen. Se requieren pruebas adicionales.',
+  'guide.lab': 'Más información en el laboratorio científico',
+  'guide.source': 'Catálogo original NASA ASF Vertex',
+  'lab.archive.t': 'Datos originales y ASF Vertex',
+  'lab.archive.d': 'ZORI procesa datos reales NISAR de NASA e ISRO. ASF Vertex permite comprobar escenas, fechas y productos originales.',
+  'lab.archive.link': 'Abrir archivo NISAR en ASF Vertex'
+});
+Object.assign(I18N.fr, {
+  'intro.eyebrow': 'TRANSMISSION URGENTE DEPUIS L’ESPACE GALACTIQUE',
+  'intro.title': 'Nous avons trouvé une planète qui ne cesse jamais de danser',
+  'intro.lead': 'Les extraterrestres ont découvert la Terre : l’eau monte, les forêts changent et le sol tremble. Explorez ces phénomènes avec ZORI grâce aux données radar du satellite NISAR.',
+  'intro.credit': 'NISAR est une véritable mission satellitaire NASA–ISRO. ZORI est un guide extraterrestre fictif qui explique les données.',
+  'guide.open': 'Comment lire ces images',
+  'guide.gcov1': 'Avant et après sont deux observations radar du même lieu à des dates différentes. Faites glisser le curseur.',
+  'guide.gcov2': 'Les niveaux de gris indiquent la force de l’écho radar. Une zone sombre n’est pas toujours de l’eau.',
+  'guide.gcov3': 'La carte Différence indique les variations de signal. Le seuil de 3 dB ne délimite pas une inondation confirmée.',
+  'guide.phase1': 'La cohérence mesure la stabilité du signal entre les acquisitions; les zones claires sont plus fiables.',
+  'guide.phase2': 'La phase décrit une différence de phase radar en radians, non un déplacement mesuré directement.',
+  'guide.phase3': 'Comparez deux couches scientifiques NISAR, pas des photos avant/après.',
+  'guide.caution': 'L’humidité, la végétation et les conditions d’acquisition peuvent modifier le signal. Vérification nécessaire.',
+  'guide.lab': 'En savoir plus au laboratoire scientifique',
+  'guide.source': 'Données originales NASA ASF Vertex',
+  'lab.archive.t': 'Données originales et ASF Vertex',
+  'lab.archive.d': 'ZORI traite des produits NISAR NASA–ISRO réels. ASF Vertex permet de vérifier les scènes, dates et types de données.',
+  'lab.archive.link': 'Consulter les archives NISAR ASF Vertex'
+});
