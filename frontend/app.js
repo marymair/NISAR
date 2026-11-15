@@ -717,7 +717,10 @@ function openSample(id) {
 
 /* ---------- events ---------- */
 function bind() {
-  $('#begin').onclick = () => enterApp('mission');
+  $('#begin').onclick = () => { window.setZoriEmotion?.('wave'); enterApp('mission'); };
+  $('#begin').addEventListener('pointerenter', () => window.setZoriEmotion?.('surprised'));
+  $('#begin').addEventListener('pointerleave', () => window.setZoriEmotion?.('happy'));
+  $('#intro a[href="#how"]')?.addEventListener('pointerenter', () => window.setZoriEmotion?.('curious'));
   $$('[data-start]').forEach(b => { b.onclick = () => enterApp(b.dataset.start); });
   $('#brand').onclick = goHome;
   $$('.nav button').forEach(b => { b.onclick = () => showView(b.dataset.view); });
