@@ -25,6 +25,7 @@ jobs:
           node --check frontend/zori.js
           node --check frontend/config.js
           node --check frontend/science-i18n.js
+          node --check frontend/i18n-it.js
           node --check frontend/i18n.js
           node --check frontend/i18n-extra.js
           node --check frontend/samples.js
