@@ -514,6 +514,19 @@ function caseMetric(s) {
  * A GUNW interferogram is a paired-acquisition phase product, NOT intensity
  * imagery before and after an earthquake. Only GCOV pairs get a comparison slider.
  */
+function readingGuide(kind) {
+  // One concise explanation directly beneath every visual, on both case pages
+  // and freshly processed results. Details remain optional, not a wall of text.
+  const phase = kind === 'gunw';
+  const keys = phase
+    ? ['guide.phase1', 'guide.phase2', 'guide.phase3']
+    : ['guide.gcov1', 'guide.gcov2', 'guide.gcov3'];
+  return '<details class="reading-guide"><summary>📖 ' +
+    esc(t('guide.open')) + '</summary><div class="reading-guide-body"><p>' +
+    keys.map(key => esc(t(key))).join('</p><p>') +
+    '</p><p class="reading-caution">' + esc(t('guide.caution')) +
+    '</p></div></details>';
+}
 function scienceVisual(data) {
   const before = data.before || data.beforeImg;
   const after = data.after || data.afterImg;
@@ -522,18 +535,21 @@ function scienceVisual(data) {
     return compareHTML(before, after, t('r.before'), t('r.after')) +
       '<figure class="live-difference"><img class="single" loading="lazy" src="' +
       esc(diff) + '" alt="' + esc(t('r.diff')) + '"><figcaption>' +
-      esc(t('live.visualdifference')) + '</figcaption></figure>';
+      esc(t('live.visualdifference')) + '</figcaption></figure>' +
+      readingGuide('gcov');
   }
   if ((data.coherence || data.coherenceImg) && (data.image || data.img || diff)) {
     const phase = data.image || data.img || diff;
     const coherence = data.coherence || data.coherenceImg;
     return compareHTML(coherence, phase, t('case.coherence'), t('case.phaseShort')) +
-      '<p class="science-product-note">' + esc(t('case.phaseCompare')) + '</p>';
+      '<p class="science-product-note">' + esc(t('case.phaseCompare')) + '</p>' +
+      readingGuide('gunw');
   }
   if (data.image || data.img || diff) {
     return '<figure class="phase-product"><img class="single" loading="lazy" src="' +
       esc(data.image || data.img || diff) + '" alt="' + esc(t('case.phase')) +
-      '"><figcaption>' + esc(t('case.phase')) + '</figcaption></figure>';
+      '"><figcaption>' + esc(t('case.phase')) + '</figcaption></figure>' +
+      readingGuide('gunw');
   }
   return '<p class="scan-error">' + esc(t('case.notReady')) + '</p>';
 }
