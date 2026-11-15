@@ -39,8 +39,14 @@ const sources = [
 // jsdom's eval() creates a new lexical environment for each invocation,
 // unlike browser script tags that share one global lexical environment.
 // Joining the scripts preserves const I18N / SAMPLES visibility across files.
+// Browser-only fixture for two saved results; never included in production assets.
+const caseFixture = [
+  "Object.assign(SAMPLES.find(s => s.id === 'mozambique'), {precomputed:true, before:'/assets/cases/mozambique-before.png', after:'/assets/cases/mozambique-after.png', difference:'/assets/cases/mozambique-difference.png', sources:[{date:'2026-01-05'},{date:'2026-01-17'}], stats:{median_delta_db:3.72,changed_pixel_fraction:.6156}});",
+  "Object.assign(SAMPLES.find(s => s.id === 'venezuela'), {precomputed:true, image:'/assets/cases/venezuela-difference.png', sources:[{date:'2026-06-30'}], stats:{relative_phase_iqr_rad:1.5}});"
+].join('\n');
 const compiledPage = sources
-  .map(source => fs.readFileSync(path.join(root, 'frontend', source), 'utf8'))
+  .map(source => fs.readFileSync(path.join(root, 'frontend', source), 'utf8') +
+    (source === 'case-data.js' ? caseFixture : ''))
   .join('\n;\n');
 try {
   win.eval(compiledPage);
@@ -52,9 +58,11 @@ const text = id => doc.querySelector(id)?.textContent?.trim() || '';
 assert.equal(errors.length, 0, errors.join('\n'));
 assert.ok(text('.hero .lead').length > 40, 'Hero lead must have localized text');
 assert.ok(text('#intro .logline').length > 10, 'Transmission log must be populated');
-assert.equal(doc.querySelectorAll('#intro-cases .case-card').length, 3, 'All three NASA case cards must appear');
-assert.equal(doc.querySelectorAll('#cases-grid .case-card').length, 3, 'Mission cases must appear');
-assert.equal(doc.querySelectorAll('#cases-grid .case-feature').length, 3, 'Precomputed case panels with short explanations must render');
+assert.equal(doc.querySelectorAll('#intro-cases .case-card').length, 2, 'Only two archived NASA science cases appear');
+assert.equal(doc.querySelectorAll('#cases-grid .case-card').length, 2, 'Incomplete crops case stays hidden');
+assert.equal(doc.querySelectorAll('#cases-grid .case-feature').length, 2, 'Both verified science cases appear');
+assert.equal(doc.querySelectorAll('#cases-grid .compare-group').length, 1, 'GCOV has slider; GUNW phase does not fake before-after');
+assert.doesNotMatch(doc.querySelector('#cases-grid').textContent, /Maize Triangle|Кукурузный треугольник/, 'Unprepared South Africa case is hidden');
 assert.match(doc.querySelector('#cases-grid').textContent, /Cause|Причина|Cause and interpretation/);
 assert.equal(doc.querySelectorAll('#cases-grid img[src^="https://"]').length, 0, 'No foreign photographs can appear in case panels');
 assert.ok(doc.querySelector('#begin').onclick, 'Start mission must be wired');
@@ -74,7 +82,7 @@ const russian = doc.querySelector('#lang-menu [data-lang="ru"]');
 russian.click();
 assert.equal(doc.documentElement.lang, 'ru');
 assert.match(text('.hero h1'), /планету/i);
-assert.equal(doc.querySelectorAll('#intro-cases .case-card').length, 3);
+assert.equal(doc.querySelectorAll('#intro-cases .case-card').length, 2);
 
 doc.querySelector('#theme-toggle').click();
 assert.equal(doc.documentElement.dataset.theme, 'light');
