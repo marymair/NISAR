@@ -10,9 +10,13 @@ SAMPLES = (ROOT / "frontend/samples.js").read_text(encoding="utf8")
 
 
 def test_live_nisar_results_precede_nasa_reference_when_successful():
-    assert "const R = state.report, s = R && R.live ? null : state.sample" in APP
-    assert "live.beforeImg && live.afterImg" in APP
-    assert "live.diffImg" in APP
+    assert "const s = R && R.live ? null : sample" in APP
+    assert "const before = data.before || data.beforeImg" in APP
+    assert "const after = data.after || data.afterImg" in APP
+    assert "const diff = data.difference || data.diffImg" in APP
+    assert 'class="unified-science-report"' in APP or 'unified-science-report' in APP
+    assert "case.liveEventRadar" in APP
+    assert "case.liveCause." in APP
 
 
 def test_catalog_failure_does_not_degrade_to_unfiltered_nisar_results():
@@ -66,3 +70,25 @@ def test_precomputed_case_gallery_no_external_image_substitutions():
     assert 'spec["image_kinds"]' in precompute
     assert 'png.startswith(PNG_HEADER)' in precompute
     assert 'No NASA illustrations or unverified data were downloaded.' in precompute
+
+
+def test_only_verified_cases_are_in_intro_and_gallery():
+    assert "function readyCases()" in APP
+    assert "s.precomputed === true" in APP
+    assert "const ready = readyCases()" in APP
+    assert "const intro = ready.map" in APP
+    assert "ready.length ? ready.map" in APP
+    assert "scienceVisual(s)" in APP
+    assert "case.noArchive" in APP
+    assert "case.scanUnavailable" in APP
+
+
+def test_unified_science_result_shows_event_causes_and_methods_honestly():
+    assert "const eventDescription = sample" in APP
+    assert "case.liveEventPhase" in APP
+    assert "case.liveEventRadar" in APP
+    assert "case.noConfirmedEvent" in APP
+    assert "case.metricGCOV" in APP
+    assert "case.metricGUNW" in APP
+    css = (ROOT / "frontend/mission-polish.css").read_text(encoding="utf8")
+    assert "#result .unified-science-report" in css
