@@ -506,82 +506,137 @@ function caseMetric(s) {
   }
   return '';
 }
-function renderResult() {
-  const el = $('#result'); const ty = state.change;
-  if (!ty || (!state.report && !state.sample) || !state.point) { el.hidden = true; return; }
-  // A newly requested scientific analysis takes precedence over the curated NASA case.
-  // Otherwise, selecting the Mozambique example hides the real HDF5 result forever.
-  // The official image remains available if science processing is unavailable.
-  const R = state.report, s = R && R.live ? null : state.sample;
-  let title, media = '', extra = '', facts = [];
-  if (s) {
-    title = s.title[state.lang] || s.title.en;
-    extra = `<p><strong>${esc(t('case.event'))}:</strong> ${esc(s.event[state.lang] || s.event.en)}</p><p><strong>${esc(t('case.cause'))}:</strong> ${esc(s.cause[state.lang] || s.cause.en)}</p>`;
-    const metric = caseMetric(s);
-    if (metric) extra += `<p class="case-measure">${esc(metric)}</p>`;
-    if (s.sources?.length) extra += `<p class="credit">${esc(t('case.satellite'))} · ${s.sources.map(x => esc(String(x.date || '').slice(0, 10))).join(' / ')} · ${esc(t('case.archived'))}</p>`;
-    if (s.sourceUrl) extra += `<p class="credit"><a href="${esc(s.sourceUrl)}" target="_blank" rel="noopener noreferrer">${esc(t('case.scienceSource'))}</a></p>`;
-    if (s.before && s.after) media = compareHTML(s.before, s.after, t('r.before'), t('r.after')) + (s.difference ? `<details><summary>${esc(t('r.diff'))}</summary><img class="single" loading="lazy" src="${esc(s.difference)}" alt="${esc(t('r.diff'))}"></details>` : '');
-    else if (s.image) media = `<figure><img class="single" loading="lazy" src="${esc(s.image)}" alt="${esc(t('case.phase'))}"><figcaption>${esc(t('case.phase'))}</figcaption></figure>`;
-    else media = `<p class="scan-error">${esc(t('case.notReady'))}</p>`;
-    if (R?.liveFailed) extra += `<p class="scan-error">${esc(t('live.fail'))}${R.liveError ? ' · ' + esc(R.liveError) : ''}</p>`;
-  } else {
-    title = t('ch.' + ty + '.name');
-    const { rec, withImg, pair, live, liveFailed } = R;
-    const dates = state.scenes.map(x => x.startTime).filter(Boolean);
-    facts.push(t('r.kf.scenes', { n: state.scenes.length, a: fmtDate(dates[0]), b: fmtDate(dates.at(-1)) }));
-    if (live) {
-      media = `<span class="live-badge">${esc(t('live.badge'))}</span>`;
-      if (live.beforeImg && live.afterImg) {
-        media += compareHTML(live.beforeImg, live.afterImg, t('r.before'), t('r.after'));
-        media += `<figure class="live-difference"><img class="single" src="${esc(live.diffImg)}" alt="${esc(t('r.diff'))}"><figcaption>${esc(t('live.visualdifference'))}</figcaption></figure>`;
-      } else if (live.img) {
-        media += `<figure><img class="single" src="${esc(live.img)}" alt="${esc(title)}"><figcaption>${esc(t('live.phase'))}</figcaption></figure>`;
-      }
-      const st = live.stats;
-      if (Number.isFinite(st.median_delta_db)) facts.push(t('live.median', {n: st.median_delta_db.toFixed(2)}));
-      if (Number.isFinite(st.changed_pixel_fraction)) facts.push(t('live.changed', {n: (st.changed_pixel_fraction * 100).toFixed(1)}));
-      if (Number.isFinite(st.relative_phase_iqr_rad)) facts.push(t('live.phaseiqr', {n: st.relative_phase_iqr_rad.toFixed(2)}));
-      extra = `<p class="note">${esc(live.method || '')}</p><p class="note">${esc(t('live.warning'))}</p>`;
-      if (live.sources.length) extra += `<details><summary>${esc(t('live.sources'))}</summary><ul class="scene-list">${live.sources.map(s => `<li>${esc(s.date || '')} · ${esc(s.maturity || '')} · ${esc(s.id || '')}</li>`).join('')}</ul></details>`;
-      if (Number.isFinite(st.disp_min_cm) && Number.isFinite(st.disp_max_cm)) facts.push(t('r.disp', { a: st.disp_min_cm.toFixed(2), b: st.disp_max_cm.toFixed(2) }));
-    } else if (!rec.length) {
-      extra = `<p class="note">${esc(t('r.norec', { levels: levelSummary() }))}</p>`;
-    } else if (pair) {
-      media = compareHTML(browseUrl(pair[0]), browseUrl(pair[1]), fmtDate(pair[0].startTime), fmtDate(pair[1].startTime));
-      extra = `<p class="note">${esc(t('r.pair', { a: fmtDate(pair[0].startTime), b: fmtDate(pair[1].startTime) }))}</p>`;
-      facts.push(t('r.kf.pair', { a: fmtDate(pair[0].startTime), b: fmtDate(pair[1].startTime) }));
-    } else if (withImg.length) {
-      const imgs = ty === 'ground' ? withImg.slice(-4).reverse() : [withImg.at(-1)];
-      media = `<div class="gallery">${imgs.map(x => `<figure><img class="single" loading="lazy" src="${esc(browseUrl(x))}" alt=""><figcaption>${esc(fmtDate(x.startTime))} · ${esc(x.processingLevel)}</figcaption></figure>`).join('')}</div>`;
-      if (ty !== 'ground') extra = `<p class="note">${esc(t('r.one'))}</p>`;
-    } else extra = `<p class="note">${esc(t('r.noimg'))}</p>`;
-    if (liveFailed) extra += `<p class="scan-error">${esc(t('live.fail'))}${R.liveError ? ' · ' + esc(R.liveError) : ''}</p>`;
+
+/* One uniform scientific visualization for both precomputed cases and new jobs.
+ * A GUNW interferogram is a paired-acquisition phase product, NOT intensity
+ * imagery before and after an earthquake. Only GCOV pairs get a comparison slider.
+ */
+function scienceVisual(data) {
+  const before = data.before || data.beforeImg;
+  const after = data.after || data.afterImg;
+  const diff = data.difference || data.diffImg;
+  if (before && after && diff) {
+    return compareHTML(before, after, t('r.before'), t('r.after')) +
+      '<figure class="live-difference"><img class="single" loading="lazy" src="' +
+      esc(diff) + '" alt="' + esc(t('r.diff')) + '"><figcaption>' +
+      esc(t('live.visualdifference')) + '</figcaption></figure>';
   }
+  if (data.image || data.img) {
+    return '<figure class="phase-product"><img class="single" loading="lazy" src="' +
+      esc(data.image || data.img) + '" alt="' + esc(t('case.phase')) +
+      '"><figcaption>' + esc(t('case.phase')) + '</figcaption></figure>';
+  }
+  return '<p class="scan-error">' + esc(t('case.notReady')) + '</p>';
+}
+function readyCases() {
+  // Never show unfinished cases as if they have finished science products.
+  return SAMPLES.filter(s => s.precomputed === true &&
+    ((s.before && s.after && s.difference) || s.image));
+}
+function renderResult() {
+  const el = $('#result'), ty = state.change;
+  if (!ty || (!state.report && !state.sample) || !state.point) {
+    el.hidden = true; return;
+  }
+  const R = state.report;
+  const sample = state.sample;
+  const s = R && R.live ? null : sample;
+  const live = R && R.live;
+  const title = s ? (s.title[state.lang] || s.title.en)
+    : (sample && live ? (sample.title[state.lang] || sample.title.en)
+      : t('ch.' + ty + '.name'));
   const p = state.point;
-  const vertex = `https://search.asf.alaska.edu/#/?dataset=NISAR&center=${p.lng},${p.lat}&zoom=8`;
-  const list = (R ? R.rec : []).slice(-8).reverse().map(x => `<li>${esc(fmtDate(x.startTime))} · ${esc(x.processingLevel)} · ${esc(x.fileID || x.fileName || '')}</li>`).join('');
-  el.innerHTML = `
-    <h2>${ICON[ty]} ${esc(title)}</h2>
-    <div class="report-grid">
-      <div>${media}${extra}</div>
-      <div>
-        ${facts.length ? `<h3>${esc(t('r.key'))}</h3><ul class="kf">${facts.map(f => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
-        <details class="science-disclosure"><summary>${esc(t('r.science'))}</summary>
-        <h3>${esc(t('r.read'))}</h3><p>${esc(t('ch.' + ty + '.how'))}</p>
-        <h3>${esc(t('r.pol'))}</h3><p>${esc(t('pol.' + ty))}</p>
-        <h3>${esc(t('r.why'))}</h3><p>${esc(t('ch.' + ty + '.why'))}</p>
-        <h3>${esc(t('r.trust'))}</h3><p>${esc(t('r.trustd'))}</p>
-        <h3>${esc(t('r.future'))}</h3><p>${esc(t('r.futured'))}</p>
-        <p class="note">${esc(t('r.optical'))}</p></details>
-        <p style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn primary" id="explain-btn">${esc(t('r.explain'))}</button>
-          <a class="btn" style="text-decoration:none;color:inherit" href="${esc(vertex)}" target="_blank" rel="noopener">${esc(t('r.vertex'))}</a>
-        </p>
-        ${list ? `<details><summary>${esc(t('r.scenes'))}</summary><ul class="scene-list">${list}</ul></details>` : ''}
-      </div>
-    </div>`;
-  $$('img.single', el).forEach(i => { i.onerror = () => { const n = document.createElement('p'); n.className = 'scan-error'; n.textContent = t('live.imageexpired'); i.replaceWith(n); }; });
+  const vertex = 'https://search.asf.alaska.edu/#/?dataset=NISAR&center=' +
+    encodeURIComponent(p.lng + ',' + p.lat) + '&zoom=8';
+  let media, summary = '', badge;
+  if (s) {
+    badge = t(s.precomputed ? 'case.archived' : 'case.pending');
+    media = scienceVisual(s);
+    summary += '<p><strong>' + esc(t('case.event')) + '</strong> ' +
+      esc(s.event[state.lang] || s.event.en) + '</p>';
+    summary += '<p><strong>' + esc(t('case.cause')) + '</strong> ' +
+      esc(s.cause[state.lang] || s.cause.en) + '</p>';
+    const metric = caseMetric(s);
+    if (metric) summary += '<p class="case-measure">' + esc(metric) + '</p>';
+    const dates = (s.sources || []).map(v => String(v.date || '').slice(0, 10)).filter(Boolean);
+    if (dates.length) summary += '<p class="credit">' + esc(t('case.satellite')) +
+      ': ' + esc(dates.join(' → ')) + '</p>';
+    if (s.sourceUrl) summary += '<p class="credit"><a href="' + esc(s.sourceUrl) +
+      '" target="_blank" rel="noopener noreferrer">' + esc(t('case.scienceSource')) + '</a></p>';
+    if (R && R.liveFailed) summary += '<p class="scan-error">' +
+      esc(t('live.fail')) + (R.liveError ? ' · ' + esc(R.liveError) : '') + '</p>';
+  } else if (live) {
+    badge = t('live.badge');
+    media = scienceVisual(live);
+    const dates = (live.sources || []).map(v => String(v.date || '').slice(0, 10)).filter(Boolean);
+    const eventDescription = sample
+      ? (sample.event[state.lang] || sample.event.en)
+      : t(ty === 'ground' ? 'case.liveEventPhase' : 'case.liveEventRadar');
+    const causeDescription = sample
+      ? (sample.cause[state.lang] || sample.cause.en)
+      : t('case.liveCause.' + ty);
+    summary += '<p><strong>' + esc(t('case.event')) + '</strong> ' +
+      esc(eventDescription) + '</p>';
+    summary += '<p><strong>' + esc(t('case.cause')) + '</strong> ' +
+      esc(causeDescription) + '</p>';
+    if (dates.length) summary += '<p class="credit">' + esc(t('case.satellite')) +
+      ': ' + esc(dates.join(' → ')) + '</p>';
+    const st = live.stats || {};
+    if (Number.isFinite(st.median_delta_db) && Number.isFinite(st.changed_pixel_fraction)) {
+      summary += '<p class="case-measure">' + esc(t('case.metricGCOV', {
+        median: st.median_delta_db.toFixed(2),
+        fraction: (100 * st.changed_pixel_fraction).toFixed(1)
+      })) + '</p>';
+    } else if (Number.isFinite(st.relative_phase_iqr_rad)) {
+      summary += '<p class="case-measure">' + esc(t('case.metricGUNW', {
+        phase: st.relative_phase_iqr_rad.toFixed(2)
+      })) + '</p>';
+    }
+    summary += '<p class="note">' + esc(t('case.liveLimits')) + '</p>';
+    if (live.method) summary += '<details><summary>' + esc(t('r.science')) +
+      '</summary><p class="note">' + esc(live.method) + '</p><p class="note">' +
+      esc(t('live.warning')) + '</p></details>';
+    if (live.sources && live.sources.length) summary += '<details><summary>' +
+      esc(t('live.sources')) + '</summary><ul class="scene-list">' +
+      live.sources.map(v => '<li>' + esc(v.id || '') + ' · ' +
+        esc(v.date || '') + '</li>').join('') + '</ul></details>';
+  } else {
+    // A server error must not become an attractive but unrelated NASA thumbnail.
+    badge = t('case.pending');
+    media = '<p class="scan-error">' + esc(t('case.scanUnavailable')) + '</p>';
+    summary = '<p><strong>' + esc(t('case.event')) + '</strong> ' +
+      esc(t('case.noConfirmedEvent')) + '</p>' +
+      '<p><strong>' + esc(t('case.cause')) + '</strong> ' +
+      esc(t('case.liveCause.' + ty)) + '</p>' +
+      (R && R.liveError ? '<p class="scan-error">' + esc(R.liveError) + '</p>' : '');
+  }
+  const list = R && R.rec ? R.rec.slice(-8).reverse().map(x => '<li>' +
+    esc(fmtDate(x.startTime)) + ' · ' + esc(x.processingLevel) + ' · ' +
+    esc(x.fileID || x.fileName || '') + '</li>').join('') : '';
+  el.innerHTML = '<h2>' + ICON[ty] + ' ' + esc(title) + '</h2>' +
+    '<div class="report-grid unified-science-report">' +
+    '<div class="case-media"><span class="case-type">' + esc(badge) +
+    ' · NISAR</span>' + media + '</div>' +
+    '<div class="case-summary">' + summary +
+    '<details class="science-disclosure"><summary>' + esc(t('r.science')) +
+    '</summary><h3>' + esc(t('r.read')) + '</h3><p>' +
+    esc(t('ch.' + ty + '.how')) + '</p><h3>' + esc(t('r.trust')) +
+    '</h3><p>' + esc(t('r.trustd')) + '</p></details>' +
+    '<p class="result-actions"><button class="btn primary" id="explain-btn">' +
+    esc(t('r.explain')) + '</button><a class="btn" href="' + esc(vertex) +
+    '" target="_blank" rel="noopener noreferrer">' + esc(t('r.vertex')) +
+    '</a></p>' +
+    (list ? '<details><summary>' + esc(t('r.scenes')) +
+      '</summary><ul class="scene-list">' + list + '</ul></details>' : '') +
+    '</div></div>';
+  $$('img.single', el).forEach(img => {
+    img.onerror = () => {
+      const n = document.createElement('p');
+      n.className = 'scan-error';
+      n.textContent = t('live.imageexpired');
+      img.replaceWith(n);
+    };
+  });
   $('#explain-btn', el).onclick = openExplain;
   bindCompareSliders(el);
   el.hidden = false;
@@ -590,7 +645,8 @@ function renderResult() {
 /* ---------- case studies ---------- */
 function renderCases() {
   // Small cards on the landing page; full precomputed science panels under "Cases".
-  const intro = SAMPLES.map(s => `
+  const ready = readyCases();
+  const intro = ready.map(s => `
     <button class="card case-card" data-sample="${esc(s.id)}">
       <span class="ico">${ICON[s.type]}</span>
       <h3>${esc(s.title[state.lang] || s.title.en)}</h3>
@@ -599,16 +655,11 @@ function renderCases() {
     </button>`).join('');
   $('#intro-cases').innerHTML = intro;
 
-  $('#cases-grid').innerHTML = SAMPLES.map(s => {
+  $('#cases-grid').innerHTML = ready.length ? ready.map(s => {
     const title = s.title[state.lang] || s.title.en;
     const event = s.event[state.lang] || s.event.en;
     const cause = s.cause[state.lang] || s.cause.en;
-    const image = s.before && s.after
-      ? compareHTML(s.before, s.after, t('r.before'), t('r.after'))
-        + (s.difference ? `<details class="case-diff"><summary>${esc(t('r.diff'))}</summary><img class="single" loading="lazy" src="${esc(s.difference)}" alt="${esc(t('r.diff'))}"></details>` : '')
-      : s.image
-        ? `<figure><img class="single" loading="lazy" src="${esc(s.image)}" alt="${esc(t('case.phase'))}"><figcaption>${esc(t('case.phase'))}</figcaption></figure>`
-        : `<p class="scan-error">${esc(t('case.notReady'))}</p>`;
+    const image = scienceVisual(s);
     const dates = (s.sources || []).map(v => esc(String(v.date || '').slice(0, 10))).filter(Boolean).join(' → ');
     return `<article class="card case-card case-feature">
         <div class="case-media">
@@ -626,7 +677,7 @@ function renderCases() {
           <button class="btn primary" type="button" data-sample="${esc(s.id)}">${esc(t('case.inspect'))}</button>
         </div>
       </article>`;
-  }).join('');
+  }).join('') : `<div class="card case-empty"><p>${esc(t('case.noArchive'))}</p></div>`;
   bindCompareSliders($('#cases-grid'));
 }
 
