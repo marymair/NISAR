@@ -64,7 +64,7 @@ function applyLang(lang) {
   $$('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
   $$('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
   $('#lang-current').textContent = lang.toUpperCase();
-  $$$('#lang-menu [data-lang]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.lang === lang)));
+  $$('#lang-menu [data-lang]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.lang === lang)));
   updateToolLabels();
   renderSignal(); renderCases(); startNotes(); refreshPanel(); renderTimeline(); renderResult();
   if ($('#explain').open) fillExplain();
@@ -587,7 +587,7 @@ function bind() {
 
   const menu = $('#lang-menu'), lb = $('#lang-btn');
   lb.onclick = e => { e.stopPropagation(); menu.hidden = !menu.hidden; lb.setAttribute('aria-expanded', String(!menu.hidden)); };
-  $('#lang-menu [data-lang]').forEach(b => { b.onclick = () => { applyLang(b.dataset.lang); menu.hidden = true; window.setZoriEmotion?.('curious'); zoriSay(t('z.language')); }; });
+  $$('#lang-menu [data-lang]').forEach(b => { b.onclick = () => { applyLang(b.dataset.lang); menu.hidden = true; window.setZoriEmotion?.('curious'); zoriSay(t('z.language')); }; });
   document.addEventListener('click', () => { menu.hidden = true; lb.setAttribute('aria-expanded', 'false'); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') menu.hidden = true; });
   $('#theme-toggle').onclick = () => { applyTheme(state.theme === 'dark' ? 'light' : 'dark'); window.setZoriEmotion?.('surprised'); zoriSay(t('z.theme')); };
