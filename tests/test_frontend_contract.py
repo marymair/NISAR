@@ -35,8 +35,9 @@ def test_companion_animations_and_accessible_reference_imagery():
     assert "zori-arm-right" in ZORI
     assert "pointerdown" in ZORI
     assert "suppressClickUntil" in ZORI
-    assert "svs.gsfc.nasa.gov" in SAMPLES
-    assert "assets.science.nasa.gov" in SAMPLES
+    assert "sourceUrl: 'https://science.nasa.gov" in SAMPLES
+    assert not any(key + ": 'https://" in SAMPLES for key in ("image", "before", "after"))
+    assert 'window.ZORI_CASE_DATA' in (ROOT / "frontend/case-data.js").read_text(encoding="utf8")
 
 
 def test_before_after_slider_has_visible_thumb_and_synced_controls():
