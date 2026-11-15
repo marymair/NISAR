@@ -176,3 +176,8 @@ Object.assign(I18N.es, {
   'case.metricGCOV': 'Cambio mediano: {median} dB · |Δ| ≥ 3 dB en {fraction}% de píxeles válidos; no es un área confirmada.',
   'case.metricGUNW': 'Rango intercuartílico de fase relativa: {phase} radianes.'
 });
+
+Object.assign(I18N.ru, { 'case.pending': 'Ожидает предварительной обработки' });
+Object.assign(I18N.en, { 'case.pending': 'Awaiting verified radar precomputation' });
+Object.assign(I18N.fr, { 'case.pending': 'Calcul scientifique non archivé' });
+Object.assign(I18N.es, { 'case.pending': 'Pendiente de procesamiento verificado' });
