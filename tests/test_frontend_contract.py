@@ -92,3 +92,38 @@ def test_unified_science_result_shows_event_causes_and_methods_honestly():
     assert "case.metricGUNW" in APP
     css = (ROOT / "frontend/mission-polish.css").read_text(encoding="utf8")
     assert "#result .unified-science-report" in css
+
+
+
+def test_final_hero_has_real_earth_radar_and_explicit_nasa_isro_credits():
+    import xml.etree.ElementTree as ET
+
+    sphere = (ROOT / "frontend/assets/earth-sphere.svg").read_text(encoding="utf8")
+    panorama = (ROOT / "frontend/assets/observatory.svg").read_text(encoding="utf8")
+    css = (ROOT / "frontend/mission-polish.css").read_text(encoding="utf8")
+    ET.fromstring(sphere)
+    ET.fromstring(panorama)
+    assert 'assets/earth-sphere.svg' in css
+    assert 'class="earth-scanner"' in HTML
+    assert 'class="mission-attribution"' in HTML
+    assert 'data-i18n="intro.credit"' in HTML
+    assert "NASA–ISRO" in SCIENCE and "NASA и ISRO" in SCIENCE
+    assert "Мы обнаружили планету, которая никогда не перестаёт танцевать" in SCIENCE
+    assert "emergency-signal" in css
+    assert "prefers-reduced-motion" in css
+
+
+def test_scientific_reading_guides_directly_under_all_images_and_archive_in_lab():
+    css = (ROOT / "frontend/mission-polish.css").read_text(encoding="utf8")
+    assert "function readingGuide(kind)" in APP
+    assert "readingGuide('gcov')" in APP
+    assert APP.count("readingGuide('gunw')") >= 2
+    for key in ("guide.gcov1", "guide.gcov2", "guide.gcov3",
+                "guide.phase1", "guide.phase2", "guide.phase3", "guide.caution"):
+        assert key in SCIENCE
+    assert ".reading-guide > summary" in css
+    assert 'data-open-lab' in APP
+    assert 'class="lab-archive"' in HTML
+    assert "guide.source" in APP
+    assert 'href="https://search.asf.alaska.edu/#/?dataset=NISAR"' in HTML
+    assert "data-open-lab" in APP
