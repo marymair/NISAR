@@ -1,5 +1,7 @@
 # ZORI Observatory — Google Cloud Run deployment
 
+**ASF 401 notice:** if a bearer-token download fails on OAuth redirects, use the troubleshooting section below for the secure username/password alternative.
+
 The repository serves the browser frontend and the real NASA ASF catalog/processing API together through FastAPI (Python), not nginx.
 
 ## What you need
@@ -92,3 +94,19 @@ Open the actual URL. Health should report earthdata_credentials_configured=true 
 - https://urs.earthdata.nasa.gov/
 - https://cloud.google.com/run/docs/deploying-source-code
 - https://cloud.google.com/secret-manager/docs/creating-and-accessing-secrets
+
+
+## Troubleshooting: ASF HTTP 401 with an Earthdata bearer token
+
+An Earthdata bearer token may fail at the ASF/NISAR HTTPS distribution gateway because authentication headers are stripped on cross-host OAuth redirects. An ASF maintainer documented this behavior in earthaccess issue #439. Try Earthdata username/password securely stored as two separate Google Secret Manager secrets, and remove EARTHDATA_TOKEN from the Cloud Run service configuration.
+
+1. Accept the NASA Earthdata Login Alaska Satellite Facility Data Access EULA and authorize the corresponding application. Check the ASF Egress Control authorization if offered.
+2. Store the EARTHDATA_USERNAME and EARTHDATA_PASSWORD values in two *different Secret Manager secrets*. Never put credentials in repository code or terminal command arguments.
+3. Grant the Cloud Run service account roles/secretmanager.secretAccessor for both secrets.
+4. Replace the old token binding with --set-secrets=EARTHDATA_USERNAME=zori-earthdata-username:1,EARTHDATA_PASSWORD=zori-earthdata-password:1. Do not leave EARTHDATA_TOKEN set: earthaccess may prefer it.
+5. Re-run POST /analyze and GET /status/{job_id}. The /health endpoint only reports configuration presence, not successful authentication or science processing.
+
+Sources:
+- https://github.com/earthaccess-dev/earthaccess/issues/439
+- https://nisar-docs.asf.alaska.edu/asf-search/
+- https://docs.cloud.google.com/run/docs/configuring/services/secrets
