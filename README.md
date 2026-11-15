@@ -93,3 +93,10 @@ This submits three science jobs to the already-deployed, Earthdata-authenticated
 
 No credentials are exposed in this archive; authentication remains inside Cloud Run. The code reports a case as **not ready** when there are no compatible data or processing fails; it never creates placeholder science images. Confirmed GCOV cases (such as Mozambique) show an actual before/after radar comparison and change map. GUNW is a *paired interferometric phase result* and is shown as **one science image**, never mislabeled as two displacement photographs. A GCOV backscatter change does not prove the flood footprint or crop yield. Sources and cautions remain visible.
 
+
+
+## The alien lab is a story, not NASA ownership
+
+**NISAR belongs to NASA and ISRO, not to ZORI.** ZORI is an original, fictional alien character that guides users through authentic NASA–ISRO and NASA ASF radar observations. The on-demand science API processes archived public NISAR products and does not imply an official NASA/ISRO endorsement or real-time satellite telemetry.
+
+The introductory planet and scanning graphics are original SVG/CSS illustrations. The recognizable terrestrial coastlines were simplified from Basemap's GSHHS coastline geometry and used for a stylized illustration, not as georeferenced scientific output. The science result panels display separate genuine GCOV and GUNW measurements. Both the saved example cases and new analyses provide a concise, localized "How to read these images" guide; source archive links are grouped under technical details and the Science Lab.
