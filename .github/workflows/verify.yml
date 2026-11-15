@@ -19,6 +19,10 @@ jobs:
         run: python -m compileall -q backend
       - name: Offline scientific and API tests
         run: python -m pytest -q tests
+      - name: Run real UI startup smoke test
+        run: |
+          npm install --no-save --no-audit --no-fund jsdom@26
+          node tests/frontend-boot.cjs
       - name: JavaScript syntax
         run: |
           node --check frontend/app.js
