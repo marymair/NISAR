@@ -72,5 +72,23 @@ doc.querySelector('#theme-toggle').click();
 assert.equal(doc.documentElement.dataset.theme, 'light');
 
 assert.equal(errors.length, 0, errors.join('\n'));
-console.log('PASS: boot, hero, four log entries, 3 cases, actions, Italian, Russian, theme and ZORI');
+
+// Render the actual compareHTML function from app.js in a DOM and check that
+// a user-visible range is present, with two stacked radar images and a handle.
+const appText = fs.readFileSync(path.join(root, 'frontend/app.js'), 'utf8');
+const matched = appText.match(/function compareHTML\(a, b, la, lb\) \{[\s\S]*?\n\}/);
+assert.ok(matched, 'before/after renderer exists');
+const makeCompare = new Function('esc', 't', 'return (' + matched[0] + ')')(
+  str => String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;'),
+  key => ({ 'r.slide': 'Slider' })[key] || key
+);
+const compEl = doc.createElement('section');
+compEl.innerHTML = makeCompare('/before.png', '/after.png', 'Before', 'After');
+doc.body.appendChild(compEl);
+assert.equal(compEl.querySelectorAll('.compare img').length, 2, 'two co-registered images are present');
+assert.ok(compEl.querySelector('.c-handle .c-grip'), 'visible divider grabber is present');
+assert.equal(compEl.querySelectorAll('input[type=range]').length, 2, 'in-image slider and visible external slider exist');
+assert.ok(compEl.querySelector('.compare-slider-row .compare-range'), 'native accessible range is visible below images');
+assert.match(compEl.textContent, /Before[\s\S]*After/);
+console.log('PASS: boot, languages, cases, theme, ZORI, and comparison slider');
 win.close();
