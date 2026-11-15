@@ -434,7 +434,9 @@ function compareHTML(a, b, la, lb) {
 function renderResult() {
   const el = $('#result'); const ty = state.change;
   if (!ty || (!state.report && !state.sample) || !state.point) { el.hidden = true; return; }
-  const s = state.sample, R = state.report;
+  // A newly requested scientific analysis takes precedence over the curated NASA case.
+  // Otherwise, selecting the Mozambique example hides the real HDF5 result forever.
+  const R = state.report, s = R ? null : state.sample;
   let title, media = '', extra = '', facts = [];
   if (s) {
     title = s.title[state.lang] || s.title.en;
