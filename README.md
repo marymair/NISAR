@@ -22,7 +22,7 @@ This project **does not stream raw telemetry directly from orbit**; it queries t
 
 A radar brightness change can be caused by many factors, including acquisition geometry, moisture, and seasonal growth. It **does not automatically confirm a flood or forest fire**. The changed-pixel statistic is not an affected-area estimate. GUNW phase requires geophysical corrections before it can be interpreted as physical displacement. The results are exploratory and should be verified using source granules and secondary observations.
 
-Full HDF5 processing requires an Earthdata Login token injected as a **Google Cloud Run Secret Manager secret**; do not put credentials in frontend JavaScript. NASA science files can be extremely large, and data reads can be slow. The backend is a single-instance in-memory demonstrator with limited concurrency and no durable job queue.
+Full HDF5 processing requires NASA Earthdata Login credentials supplied securely through **Google Cloud Secret Manager** (this Cloud Run deployment uses EARTHDATA_USERNAME and EARTHDATA_PASSWORD because ASF OAuth may reject bearer-token redirects). Never put credentials in frontend JavaScript or GitHub. NASA science files can be extremely large, and data reads can be slow. The backend is a single-instance in-memory demonstrator with limited concurrency and no durable job queue.
 
 ## Running and deployment
 
@@ -57,7 +57,7 @@ CI: [Verify ZORI Observatory](https://github.com/marymair/NISAR/actions), includ
 - [South African Maize Triangle, 2025–26](https://science.nasa.gov/earth/earth-observatory/painting-the-growing-season-in-the-maize-triangle/)
 - [Mozambique floods, January 2026](https://svs.gsfc.nasa.gov/5661/)
 
-The case cards link to official NASA studies. Those published example illustrations are not represented as new calculations by our application.
+The case cards show NASA-published image assets with explicit source links and creator credits, while on-demand ZORI scientific results are labeled separately. Mozambique official pre/post images are from NASA SVS #5661 (Zoey N. Armstrong); the Venezuela image is NASA Earth Observatory (Lauren Dauphin/NISAR team), and the South African imagery is Paul Siqueira (UMass Amherst), prepared for NASA Earth Observatory by Michala Garrison. The ZORI-generated GCOV and GUNW results are derived separately from ASF scene files. Never present a NASA-published illustration as a fresh ZORI calculation.
 
 ## Dependencies and attribution
 
@@ -65,7 +65,7 @@ The case cards link to official NASA studies. Those published example illustrati
 - [NASA ASF DAAC](https://asf.alaska.edu/) data catalog and [NISAR User Guide](https://nisar-docs.asf.alaska.edu/); see each returned scene's product ID/date for scientific provenance.
 - [asf_search](https://docs.asf.alaska.edu/asf_search/), [earthaccess](https://earthaccess.readthedocs.io/), [h5py](https://www.h5py.org/), [NumPy](https://numpy.org/), [SciPy](https://scipy.org/), [pyproj](https://pyproj4.github.io/pyproj/), [Pillow](https://pillow.readthedocs.io/), [FastAPI](https://fastapi.tiangolo.com/), [Uvicorn](https://www.uvicorn.org/), and [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/).
 - Base map provider and attribution: Esri World Imagery, NASA GIBS imagery, CARTO and OpenStreetMap; these are contextual basemaps, **not NISAR scientific measurements**. Their respective licenses and attribution requirements apply.
-- Original ZORI mascot and app code are authored in this project; images from external reference sites are not incorporated without permission.
+- Original ZORI mascot and app code are authored in this project. NASA scientific imagery shown in the reference case cards is cited to its original authors and pages and used in an educational, informational context under [NASA's imagery and media guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/). NASA trademarks and logos are not used to imply endorsement. NASA imagery can include third-party rights and must be reviewed case by case.
 - AI disclosure: ChatGPT/OpenAI tools supported ideation, UI design, code generation, debugging, technical writing and testing. The project is human-directed and scientific claims are linked to primary NASA/ASF sources.
 
 ## Independent project and license
@@ -73,3 +73,7 @@ The case cards link to official NASA studies. Those published example illustrati
 This is **not an official NASA, ISRO or Alaska Satellite Facility website** and does not imply endorsement. Agency logos are not displayed. NASA/ASF is credited for the scientific data.
 
 Source code: [MIT License](LICENSE), copyright 2026 marymair; third-party libraries, maps and NASA source imagery retain their own terms. See [docs/SUBMISSION.md](docs/SUBMISSION.md) for the English submission narrative and demo checklist.
+
+## Contest sources and user-facing accessibility
+
+NASA Space Apps 2026 [participant terms](https://www.spaceappschallenge.org/legal/) require citing **every** source, including open-source dependencies and imagery. The source documentation and case cards reference the original NASA studies. The published NASA images are clearly distinguished from the app's own on-demand numerical results. The observatory offers English, Russian, French, Spanish and Italian; two geographic map projections (3-D globe and 2-D flat map); a draggable, blinking, animated ZORI guide; and explicit "no compatible data" states rather than unrelated generic catalog fallbacks. The processor intentionally rejects locations outside ±85° latitude. The backend currently uses an in-memory job store; image links may expire when Cloud Run restarts.
