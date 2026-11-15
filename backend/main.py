@@ -247,7 +247,7 @@ def status(job_id: str):
 
 
 @app.get("/image/{job_id}")
-def image(job_id: str, kind: Literal["before", "after", "difference"] = "difference"):
+def image(job_id: str, kind: Literal["before", "after", "difference", "coherence"] = "difference"):
     with _lock:
         job = _jobs.get(job_id)
         data = job.get("images", {}).get(kind) if job else None
