@@ -1,10 +1,26 @@
-/* Verified NASA story cards. These are curated references, NOT locally computed results.
- * Always cite NASA story URLs and avoid missing local images or invented metrics.
+/* Verified source stories, but all visible science images MUST come from ZORI's
+ * own precomputed ASF NISAR HDF5 output, locally packaged in /assets/cases/.
+ * Reference source URLs are text links only: no external pictures are embedded.
+ * Case-data.js adds actual processed images + measurements after the seed step.
  */
 const SAMPLES = [
   {
     id: 'venezuela', type: 'ground', lat: 10.55, lng: -66.9, zoom: 8,
-    image: 'https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/where-venezuela%E2%80%99s-earthquakes-shifted-the-ground/venezuela_nisar_20260630_lrg.jpg?crop=faces%2Cfocalpoint&fit=clip&h=2225&w=3338',
+    analysisKind: 'gunw',
+    event: {
+      ru: '24 июня 2026 года два сильных землетрясения сотрясли север Венесуэлы, включая районы Каракаса и Ла-Гуайры.',
+      en: 'On June 24, 2026, two powerful earthquakes struck northern Venezuela near Caracas and La Guaira.',
+      it: 'Il 24 giugno 2026, due forti terremoti hanno colpito il nord del Venezuela.',
+      fr: 'Le 24 juin 2026, deux violents séismes ont frappé le nord du Venezuela.',
+      es: 'El 24 de junio de 2026, dos fuertes terremotos sacudieron el norte de Venezuela.'
+    },
+    cause: {
+      ru: 'Причина: резкое смещение пород вдоль тектонических разломов. Интерферограмма NISAR показывает разницу радарной фазы, а не две фотографии смещения.',
+      en: 'Cause: abrupt tectonic fault slip. NISAR interferometric phase is a derived pair result, not two photographs of displacement.',
+      it: 'Causa: scorrimento lungo faglie tettoniche. La fase InSAR non è una coppia di fotografie.',
+      fr: 'Cause : rupture le long de failles tectoniques. La phase InSAR n’est pas deux photos.',
+      es: 'Causa: ruptura de fallas tectónicas. La fase InSAR no son dos fotografías.'
+    },
     from: '2026-06-17', to: '2026-07-08',
     sourceUrl: 'https://science.nasa.gov/earth/earth-observatory/where-venezuelas-earthquakes-shifted-the-ground/',
     credit: 'NASA Earth Observatory / Lauren Dauphin; NISAR science team and Eric Fielding',
@@ -25,7 +41,21 @@ const SAMPLES = [
   },
   {
     id: 'maize', type: 'forest', lat: -28.5, lng: 27.0, zoom: 8,
-    image: 'https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/painting-a-season-in-the-maize-triangle/southafricaag_nisar_20260310_lrg.jpg?crop=faces%2Cfocalpoint&fit=clip&h=3238&w=4475',
+    analysisKind: 'gcov',
+    event: {
+      ru: 'В сельскохозяйственном районе ЮАР поля менялись в течение посевного сезона 2025–2026 годов.',
+      en: 'South Africa’s farm fields changed during the 2025–2026 growing season.',
+      it: 'I campi agricoli sudafricani sono cambiati durante la stagione di crescita 2025–2026.',
+      fr: 'Les champs sud-africains ont évolué pendant la saison agricole 2025–2026.',
+      es: 'Los campos sudafricanos cambiaron durante la temporada de cultivo 2025–2026.'
+    },
+    cause: {
+      ru: 'Возможные причины радарных изменений: рост и уборка растений, влажность почвы и сезонные условия. Без наземной проверки это не классификация урожая.',
+      en: 'Potential radar-change drivers: crop growth and harvest, soil moisture and seasonal conditions; not a verified crop classification.',
+      it: 'Possibili cause: crescita, raccolto, umidità del suolo e stagionalità; non una classificazione verificata.',
+      fr: 'Causes possibles : croissance, récolte, humidité du sol et saisonnalité.',
+      es: 'Causas posibles: crecimiento, cosecha, humedad del suelo y estación.'
+    },
     from: '2025-11-22', to: '2026-03-10',
     sourceUrl: 'https://science.nasa.gov/earth/earth-observatory/painting-the-growing-season-in-the-maize-triangle/',
     credit: 'NASA Earth Observatory / Paul Siqueira (UMass Amherst), NISAR GCOV',
@@ -46,8 +76,21 @@ const SAMPLES = [
   },
   {
     id: 'mozambique', type: 'flood', lat: -24.5, lng: 33.2, zoom: 8,
-    before: 'https://svs.gsfc.nasa.gov/vis/a000000/a005600/a005661/Pre_FloodOverview.png',
-    after: 'https://svs.gsfc.nasa.gov/vis/a000000/a005600/a005661/Post_FloodOverview.png',
+    analysisKind: 'gcov',
+    event: {
+      ru: 'В январе 2026 года разливы рек Лимпопо и Инкомати вызвали масштабные затопления на юге Мозамбика.',
+      en: 'In January 2026, overflowing Limpopo and Incomati rivers flooded southern Mozambique.',
+      it: 'Nel gennaio 2026, la piena dei fiumi Limpopo e Incomati ha allagato il Mozambico meridionale.',
+      fr: 'En janvier 2026, la crue du Limpopo et de l’Incomati a inondé le sud du Mozambique.',
+      es: 'En enero de 2026, el desbordamiento del Limpopo y del Incomati inundó el sur de Mozambique.'
+    },
+    cause: {
+      ru: 'Причина события — сильные дожди и выход рек из берегов. Изменения яркости радара могут также зависеть от влажности, растительности и геометрии съёмки.',
+      en: 'Cause: heavy rainfall and river overflow. Radar brightness also depends on moisture, vegetation and viewing geometry.',
+      it: 'Causa: forti piogge e fiumi in piena; il radar risente anche di umidità e vegetazione.',
+      fr: 'Cause : fortes pluies et débordements des rivières. Le radar réagit aussi à l’humidité.',
+      es: 'Causa: fuertes lluvias y desbordamiento de ríos; el radar también responde a humedad y vegetación.'
+    },
     from: '2025-12-25', to: '2026-02-01',
     sourceUrl: 'https://svs.gsfc.nasa.gov/5661/',
     credit: 'NASA Scientific Visualization Studio / Zoey N. Armstrong; NISAR GCOV',
