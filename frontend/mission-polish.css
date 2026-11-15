@@ -244,3 +244,122 @@ body[data-view="cases"] #zori-widget { display: none !important; }
 #result .compare-group { max-width: 100%; }
 #view-cases .case-feature .compare-slider-row .compare-range,
 #result .compare-slider-row .compare-range { touch-action: pan-y; }
+
+
+/* FINAL GALACTIC TRANSMISSION — independent fictional ZORI observer of NASA–ISRO NISAR. */
+#intro .hero { position:relative; isolation:isolate; }
+#intro .hero > div { position:relative; z-index:2; min-width:0; }
+#intro .hero .transmit {
+  display: inline-flex; align-items:center; gap:12px; max-width:100%;
+  color:#91eaff; font:800 clamp(.98rem,1.8vw,1.22rem)/1.55 var(--font-d);
+  letter-spacing:.11em; text-transform:uppercase; margin:0 0 22px;
+  text-shadow:0 0 20px rgba(60,216,255,.5);
+}
+#intro .hero .transmit::before {
+  content:""; flex:none; display:block; width:13px; height:13px; border-radius:50%;
+  background:#ff9b5f; box-shadow:0 0 0 4px rgba(255,141,83,.16),0 0 18px #ff904e;
+  animation: emergency-signal 1.3s ease-in-out infinite;
+}
+#intro .hero .transmit::after { content:""; width:2px; height:1.1em;
+  background:currentColor; box-shadow:0 0 9px currentColor; animation:blink .85s steps(1) infinite; }
+@keyframes emergency-signal {
+  0%,100% { transform:scale(.82); opacity:.55; box-shadow:0 0 0 3px rgba(255,141,83,.09),0 0 9px #ff904e; }
+  50% { transform:scale(1.18); opacity:1; box-shadow:0 0 0 9px rgba(255,141,83,.17),0 0 25px #ff904e; }
+}
+#intro .hero h1 { max-width:17ch; font-size:clamp(2.4rem,5.5vw,4.95rem);
+ line-height:1.05; letter-spacing:-.035em; text-wrap:balance; margin:0 0 22px;
+ text-shadow:0 4px 30px rgba(38,103,179,.24); }
+#intro .hero .lead { line-height:1.72; font-size:clamp(.98rem,1.65vw,1.2rem); margin-bottom:14px; }
+#intro .mission-attribution {
+  padding:12px 16px; border-left:3px solid #79e0ff; border-radius:0 12px 12px 0;
+  background:rgba(17,55,88,.68); color:#d7f4ff; line-height:1.6;
+  max-width:60ch; font-size:.84rem; margin:12px 0 18px;
+}
+#intro .hero::before {
+  content:""; position:absolute; pointer-events:none; z-index:1;
+  inset:0; opacity:.45;
+  background-image:
+    radial-gradient(circle at 76% 30%, rgba(116,235,255,.45) 1px,transparent 3px),
+    radial-gradient(circle at 94% 54%, rgba(248,174,117,.5) 1px,transparent 3px),
+    repeating-linear-gradient(0deg,transparent 0 76px,rgba(91,164,222,.08) 77px 78px),
+    repeating-linear-gradient(90deg,transparent 0 76px,rgba(91,164,222,.08) 77px 78px);
+  background-size:43px 66px,90px 99px,100% 100%,100% 100%;
+  mask-image:linear-gradient(90deg, transparent 0%,black 58%,black 100%);
+}
+#intro .hero .porthole {
+  isolation:isolate; width:min(460px,100%); max-width:460px;
+  border:1px solid rgba(145,232,255,.76);
+  box-shadow:0 0 0 8px rgba(71,151,230,.08),0 0 80px rgba(28,165,255,.24),inset 0 0 35px #00152e;
+}
+#intro .hero .earth {
+  position:relative; z-index:1;
+  background:#08274b url("assets/earth-sphere.svg") center / cover no-repeat;
+  animation:earth-gentle-float 10s ease-in-out infinite;
+  box-shadow:inset -25px -15px 60px rgba(1,12,30,.25),0 0 30px rgba(70,203,255,.46);
+}
+@keyframes earth-gentle-float { 0%,100% {transform:translateY(0) scale(1)} 50%{transform:translateY(-3px) scale(1.008)} }
+#intro .earth-scanner { position:absolute; z-index:2; inset:11%; border-radius:50%;
+  pointer-events:none; border:1px dashed rgba(121,244,255,.35);
+  background:conic-gradient(from 90deg,transparent 0 285deg,rgba(88,232,255,.1) 335deg,rgba(88,232,255,.21) 360deg);
+  animation:radar-sweep 22s linear infinite; }
+@keyframes radar-sweep { to {transform:rotate(360deg)} }
+#intro .earth-ping { position:absolute; z-index:4; width:8px; height:8px; border-radius:50%;
+  pointer-events:none; background:#94faff; border:1px solid white; box-shadow:0 0 12px 4px #22d4ff;
+  animation:ping-dot 3s ease-in-out infinite; }
+#intro .earth-ping-one { left:52%; top:42%; }
+#intro .earth-ping-two { left:68%; top:67%; animation-delay:1.3s; }
+@keyframes ping-dot {0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.4)}}
+#intro .earth-crosshair { position:absolute;z-index:3;inset:18%;border:1px solid rgba(114,235,255,.19);
+  border-radius:50%; pointer-events:none;box-shadow:0 0 15px rgba(37,176,255,.1); }
+#intro .orbit-telemetry {display:flex;gap:9px;justify-content:center;flex-wrap:wrap;
+ margin:10px auto 12px;font:800 .7rem var(--font-d);letter-spacing:.075em;color:#9defff; }
+#intro .orbit-telemetry span { padding:6px 10px;border:1px solid rgba(93,218,255,.34);
+ background:rgba(3,19,41,.75);border-radius:6px;box-shadow:inset 0 0 13px rgba(49,159,236,.08); }
+#intro .hero-zori {filter:drop-shadow(0 5px 25px rgba(73,208,255,.56));animation:zori-hero-alert 5.2s ease-in-out infinite; }
+@keyframes zori-hero-alert {0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-12px) rotate(3deg)}}
+
+/* Reading guides are the first control directly BELOW the radar visualization. */
+#result .reading-guide,#view-cases .reading-guide { margin:16px 0 20px;
+ border:1px solid color-mix(in srgb,var(--accent) 50%,transparent);
+ border-radius:15px;overflow:hidden;
+ background:color-mix(in srgb,var(--accent) 8%,var(--panel-solid)); }
+#result .reading-guide > summary,#view-cases .reading-guide > summary {
+  cursor:pointer; list-style:none; padding:15px 18px; color:var(--accent);
+  font-family:var(--font-d); font-weight:800; font-size:1.03rem;
+  display:flex;align-items:center;justify-content:space-between;gap:15px;
+}
+#result .reading-guide > summary::-webkit-details-marker,#view-cases .reading-guide > summary::-webkit-details-marker {display:none}
+#result .reading-guide > summary::after,#view-cases .reading-guide > summary::after{
+ content:"⌄";font-size:1.4rem;line-height:1;transition:transform .2s; }
+#result .reading-guide[open] > summary::after,#view-cases .reading-guide[open] > summary::after {transform:rotate(180deg)}
+#result .reading-guide > summary:hover,#view-cases .reading-guide > summary:hover {background:var(--soft)}
+#result .reading-guide-body,#view-cases .reading-guide-body { padding:4px 18px 17px;line-height:1.6; }
+#result .reading-guide-body p,#view-cases .reading-guide-body p {margin:10px 0;font-size:.92rem; }
+#result .reading-guide-body .reading-caution,#view-cases .reading-caution {padding:10px 13px;
+ border-left:3px solid var(--accent); background:var(--soft);border-radius:8px;}
+#result .source-credit { margin-top:12px; }
+#result .science-disclosure,.case-feature .science-disclosure {margin-top:18px; }
+#result .result-actions,.case-feature .case-actions { display:flex;gap:10px;flex-wrap:wrap;margin:18px 0; }
+#result .result-actions .btn,.case-feature .case-actions .btn {font-size:.9rem;}
+#view-lab .lab-archive {border-color:var(--accent);}
+#view-lab .lab-source-link {display:inline-block;text-decoration:none;color:var(--accent);}
+html[data-theme="light"] #intro .hero .transmit {color:#03658e;text-shadow:none;}
+html[data-theme="light"] #intro .mission-attribution {background:rgba(225,243,255,.93);color:#234765;border-color:#197eac;}
+html[data-theme="light"] #intro .orbit-telemetry span {color:#d4f5ff}
+html[data-theme="light"] #result .reading-guide,html[data-theme="light"] #view-cases .reading-guide {background:#e9f7ff}
+@media(max-width:960px){
+ #intro .hero .porthole {width:min(430px,88vw)}
+ #intro .hero h1 {font-size:clamp(2.1rem,7vw,3.6rem);}
+ #intro .hero .transmit {font-size:.95rem;letter-spacing:.07em}
+ #intro .hero-zori {right:0;top:0}
+}
+@media(max-width:620px){
+ #intro .hero .transmit {font-size:.88rem;line-height:1.6;}
+ #intro .hero h1 {max-width:100%;font-size:clamp(2.05rem,9.3vw,3rem);}
+ #intro .hero .porthole {width:min(390px,90vw);}
+ #intro .orbit-telemetry span {font-size:.62rem}
+ #intro .mission-attribution {font-size:.79rem}
+}
+@media(prefers-reduced-motion:reduce){
+ #intro .hero .transmit::before,#intro .earth-scanner,#intro .earth-ping,#intro .hero-zori,#intro .earth {animation:none!important}
+}
