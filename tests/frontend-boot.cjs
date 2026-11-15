@@ -30,6 +30,7 @@ const sources = [
   'science-i18n.js',
   'i18n-it.js',
   'samples.js',
+  'case-data.js',
   'config.js',
   'app.js',
   'zori.js'
@@ -49,6 +50,9 @@ assert.ok(text('.hero .lead').length > 40, 'Hero lead must have localized text')
 assert.ok(text('#intro .logline').length > 10, 'Transmission log must be populated');
 assert.equal(doc.querySelectorAll('#intro-cases .case-card').length, 3, 'All three NASA case cards must appear');
 assert.equal(doc.querySelectorAll('#cases-grid .case-card').length, 3, 'Mission cases must appear');
+assert.equal(doc.querySelectorAll('#cases-grid .case-feature').length, 3, 'Precomputed case panels with short explanations must render');
+assert.match(doc.querySelector('#cases-grid').textContent, /Cause|Причина|Cause and interpretation/);
+assert.equal(doc.querySelectorAll('#cases-grid img[src^="https://"]').length, 0, 'No foreign photographs can appear in case panels');
 assert.ok(doc.querySelector('#begin').onclick, 'Start mission must be wired');
 assert.ok(doc.querySelector('#analyze').onclick, 'Analyze button must be wired');
 assert.equal(doc.querySelector('#btn-base'), null, 'Only globe and flat map controls');
