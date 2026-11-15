@@ -127,3 +127,25 @@ def test_scientific_reading_guides_directly_under_all_images_and_archive_in_lab(
     assert "guide.source" in APP
     assert 'href="https://search.asf.alaska.edu/#/?dataset=NISAR"' in HTML
     assert "data-open-lab" in APP
+
+
+
+def test_dutch_interface_includes_science_and_cases_and_dark_english_first_load():
+    import re
+
+    dutch = (ROOT / "frontend/i18n-nl.js").read_text(encoding="utf8")
+    core = (ROOT / "frontend/i18n.js").read_text(encoding="utf8")
+    extra = (ROOT / "frontend/i18n-extra.js").read_text(encoding="utf8")
+    html = (ROOT / "frontend/index.html").read_text(encoding="utf8")
+    keys = set(re.findall(r"'([\w.-]+)'\s*:", core + extra + SCIENCE))
+    localized = set(re.findall(r"'([\w.-]+)'\s*:", dutch))
+    assert not (keys - localized), f"Missing Dutch translations: {keys - localized}"
+    assert '<html lang="en" data-theme="dark">' in html
+    assert 'data-lang="nl"' in html
+    assert '<script src="i18n-nl.js"></script>' in html
+    assert html.index('<script src="case-data.js"></script>') < html.index('<script src="i18n-nl.js"></script>') < html.index('<script src="app.js"></script>')
+    assert "applyTheme('dark')" in APP and "applyLang('en')" in APP
+    assert "store.get('zori.lang'" not in APP
+    assert "store.get('zori.theme'" not in APP
+    assert 'SAMPLES.forEach' in dutch and "'case.coherence': 'Coherentie'" in dutch
+    assert "'guide.open': 'Hoe lees je deze beelden?'" in dutch
