@@ -471,10 +471,11 @@ function compareHTML(a, b, la, lb) {
   </div>`;
 }
 function bindCompareSliders(root) {
-  $('.compare', root).forEach(cmp => {
+  // Bind every case independently: each card has its own two synchronized sliders.
+  $$('.compare', root).forEach(cmp => {
     const group = cmp.closest('.compare-group');
     if (!group) return;
-    $('.compare img', cmp).forEach(img => {
+    $$('.compare img', cmp).forEach(img => {
       img.onerror = () => {
         if (!group.isConnected) return;
         const info = document.createElement('p');
@@ -483,7 +484,7 @@ function bindCompareSliders(root) {
         group.replaceWith(info);
       };
     });
-    const sliders = $('input[type=range]', group);
+    const sliders = $$('input[type=range]', group);
     const sync = value => {
       const pos = Math.max(0, Math.min(100, Number(value) || 0));
       cmp.style.setProperty('--pos', pos + '%');
