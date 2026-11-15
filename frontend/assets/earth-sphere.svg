@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" role="img" aria-label="Stylized Earth, Africa Europe and Asia, with oceans, coastlines and radar scanning signals">
+<defs>
+ <radialGradient id="ocean" cx=".32" cy=".22" r=".86">
+  <stop stop-color="#64c6e7"/><stop offset=".24" stop-color="#1e90c2"/><stop offset=".58" stop-color="#125c9a"/><stop offset="1" stop-color="#04183b"/>
+ </radialGradient>
+ <linearGradient id="land" x1=".16" y1=".1" x2=".85" y2=".93">
+  <stop stop-color="#b5d8a1"/><stop offset=".22" stop-color="#6eae76"/><stop offset=".52" stop-color="#d5bd75"/><stop offset=".76" stop-color="#699e6c"/><stop offset="1" stop-color="#235e5b"/>
+ </linearGradient>
+ <radialGradient id="vignette" cx=".3" cy=".27" r=".78"><stop offset=".45" stop-color="#03102d" stop-opacity="0"/><stop offset="1" stop-color="#000414" stop-opacity=".84"/></radialGradient>
+ <linearGradient id="beam"><stop stop-color="#62e9ff" stop-opacity="0"/><stop offset=".7" stop-color="#62e9ff" stop-opacity=".07"/><stop offset="1" stop-color="#9df6ff" stop-opacity=".24"/></linearGradient>
+ <clipPath id="sphere"><circle cx="320" cy="320" r="278"/></clipPath>
+ <filter id="glow"><feGaussianBlur stdDeviation="4"/></filter>
+</defs>
+<circle cx="320" cy="320" r="290" fill="#2fd6f2" opacity=".25" filter="url(#glow)"/>
+<g clip-path="url(#sphere)">
+ <circle cx="320" cy="320" r="278" fill="url(#ocean)"/>
+ <g stroke="#bce5ff" stroke-opacity=".12" stroke-width="1.5" fill="none">
+  <ellipse cx="320" cy="320" rx="125" ry="278"/><ellipse cx="320" cy="320" rx="220" ry="278"/>
+  <path d="M42 320H598M62 210H578M62 430H578"/>
+  <ellipse cx="320" cy="320" rx="278" ry="78"/><ellipse cx="320" cy="320" rx="278" ry="180"/>
+ </g>
+ <!-- Coastlines projected orthographically from simplified geographic boundaries,
+      centered near Africa, showing Eurasia, Africa, and South America. -->
+ <g fill="url(#land)" stroke="#d7f3c0" stroke-opacity=".61" stroke-width="1.8" stroke-linejoin="round">
+ <path d="M578,216 593,266 595,278 589,257 596,295 597,315 567,217 560,290 533,225 530,233 510,211 469,209 447,194 463,221 478,210 495,228 484,254 441,276 385,198 393,168 355,163 354,157 367,153 364,152 406,150 386,136 391,128 378,139 364,132 364,152 341,155 347,164 344,171 308,135 326,156 316,165 292,140 247,169 223,160 230,143 256,143 252,124 299,108 298,98 303,107 327,106 352,89 331,88 331,75 317,101 291,93 322,67 360,69 348,72 363,79 365,68 401,67 387,58 412,71 383,50 501,109Z"/>
+ <path d="M381,191 437,282 475,285 425,361 429,408 399,431 401,450 360,489 332,494 296,424 305,392 280,342 285,319 257,307 200,314 168,265 182,223 232,172 292,167 293,182 328,197 339,185Z"/>
+ <path d="M73,447 44,356 42,307 45,283 47,269 49,261 59,334 70,331 103,366 101,433 91,446 104,483 95,475 142,534 103,494Z"/>
+ <path d="M430 225q21 8 36 32l17 3-9 15-31-5-15-28z" fill="#c9bc74"/>
+ <path d="M455 330l9 15-7 30-12 9-4-25z" fill="#73a877"/>
+ <path d="M443 421l8 15-10 24-12-9z" fill="#70aa74"/>
+ </g>
+ <g fill="none" stroke="#efe4a3" stroke-opacity=".38" stroke-width="2.5">
+  <path d="M195 250q35-38 83-25t57 43q-42 18-70 52"/>
+  <path d="M300 342q52-15 91 3t-12 77"/>
+  <path d="M265 143q47 25 85 5"/>
+ </g>
+ <g fill="#f3fcff" opacity=".32">
+  <path d="M144 174q58-22 108 0t93 11q36-4 57 11-76 22-141 9-92-10-136-4z"/>
+  <path d="M366 392q53-18 111-3 35 12 55 12-43 13-87 11-64 7-95 4z"/>
+  <path d="M170 525q64-17 126-4t85 15q-85 26-180 15z"/>
+ </g>
+ <circle cx="320" cy="320" r="278" fill="url(#vignette)"/>
+ <!-- Semi-transparent radar scan sector, intentionally decorative, not measured coverage -->
+ <path d="M320 320 L535 87 A278 278 0 0 1 577 420Z" fill="url(#beam)" opacity=".7"/>
+ <g fill="none" stroke="#72ecff" stroke-width="2" stroke-opacity=".6">
+  <circle cx="405" cy="300" r="31"/><circle cx="405" cy="300" r="64" stroke-opacity=".27"/>
+  <path d="M405 288v24M393 300h24"/>
+ </g>
+ <g fill="#83efff"><circle cx="405" cy="300" r="5"/><circle cx="269" cy="188" r="3"/><circle cx="376" cy="432" r="3"/></g>
+ <g fill="none" stroke="#8beaff" stroke-opacity=".5"><path d="M269 188h55v-30M376 432h42v20"/></g>
+</g>
+<circle cx="320" cy="320" r="278" fill="none" stroke="#81deff" stroke-opacity=".78" stroke-width="3"/>
+<circle cx="320" cy="320" r="291" fill="none" stroke="#6bd8ff" stroke-opacity=".28" stroke-width="1.6" stroke-dasharray="14 9"/>
+</svg>
