@@ -15,8 +15,16 @@
  <rect x="100" y="75" width="1410" height="575" fill="url(#stars)" opacity=".7"/>
  <circle cx="1197" cy="372" r="300" fill="url(#halo)" opacity=".8"/>
  <circle cx="1197" cy="372" r="217" fill="url(#planet)" stroke="#5fe1ff" stroke-width="2" stroke-opacity=".8"/>
- <path d="M1157 178Q1209 185 1196 212L1250 219L1284 264L1260 294L1309 332L1285 382L1245 380L1220 445L1174 474L1134 445L1161 386L1110 360L1091 303L1062 259L1104 234Z" fill="#1b8b78" opacity=".42"/>
- <path d="M1303 357Q1392 386 1385 428L1363 475L1315 496L1271 467L1299 418Z" fill="#87bb8e" opacity=".25"/>
+ <!-- Recognizable Africa and Eurasia coastlines instead of arbitrary alien landmasses. -->
+ <g transform="translate(947 122) scale(.781)" fill="#73b58d" fill-opacity=".56" stroke="#b6eea2" stroke-width="1.7" stroke-opacity=".33">
+  <path d="M578,216 593,266 595,278 589,257 596,295 597,315 567,217 560,290 533,225 530,233 510,211 469,209 447,194 463,221 478,210 495,228 484,254 441,276 385,198 393,168 355,163 354,157 367,153 364,152 406,150 386,136 391,128 378,139 364,132 364,152 341,155 347,164 344,171 308,135 326,156 316,165 292,140 247,169 223,160 230,143 256,143 252,124 299,108 298,98 303,107 327,106 352,89 331,88 331,75 317,101 291,93 322,67 360,69 348,72 363,79 365,68 401,67 387,58 412,71 383,50 501,109Z"/>
+  <path d="M381,191 437,282 475,285 425,361 429,408 399,431 401,450 360,489 332,494 296,424 305,392 280,342 285,319 257,307 200,314 168,265 182,223 232,172 292,167 293,182 328,197 339,185Z" fill="#9dcc83"/>
+  <path d="M73,447 44,356 42,307 45,283 47,269 49,261 59,334 70,331 103,366 101,433 91,446 104,483 95,475 142,534 103,494Z" fill="#7ab58a"/>
+ </g>
+ <g stroke="#83ddff" stroke-opacity=".32" fill="none" stroke-width="1.7">
+  <ellipse cx="1197" cy="372" rx="90" ry="216"/><ellipse cx="1197" cy="372" rx="169" ry="216"/>
+  <path d="M980 372H1414M1024 296H1370M1024 448H1370"/>
+ </g>
  <path d="M1022 265Q1093 279 1143 316M1067 402Q1167 427 1224 448M1185 174Q1336 268 1396 371" stroke="white" stroke-width="15" stroke-opacity=".11" stroke-linecap="round"/>
  <ellipse cx="1200" cy="374" rx="306" ry="66" transform="rotate(-21 1200 374)" stroke="#73ccff" stroke-width="2.4" stroke-opacity=".57" stroke-dasharray="26 11"/>
  <ellipse cx="1200" cy="374" rx="279" ry="76" transform="rotate(21 1200 374)" stroke="#986cfc" stroke-width="1.4" stroke-opacity=".45"/>
