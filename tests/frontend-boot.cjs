@@ -36,12 +36,16 @@ const sources = [
   'zori.js'
 ];
 
-for (const source of sources) {
-  try {
-    win.eval(fs.readFileSync(path.join(root, 'frontend', source), 'utf8') + '\n//# sourceURL=' + source);
-  } catch (err) {
-    throw new Error('Script ' + source + ' threw during startup: ' + (err.stack || err));
-  }
+// jsdom's eval() creates a new lexical environment for each invocation,
+// unlike browser script tags that share one global lexical environment.
+// Joining the scripts preserves const I18N / SAMPLES visibility across files.
+const compiledPage = sources
+  .map(source => fs.readFileSync(path.join(root, 'frontend', source), 'utf8'))
+  .join('\n;\n');
+try {
+  win.eval(compiledPage);
+} catch (err) {
+  throw new Error('ZORI startup threw: ' + (err.stack || err));
 }
 const doc = win.document;
 const text = id => doc.querySelector(id)?.textContent?.trim() || '';
