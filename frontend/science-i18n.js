@@ -181,3 +181,50 @@ Object.assign(I18N.ru, { 'case.pending': 'Ожидает предварител�
 Object.assign(I18N.en, { 'case.pending': 'Awaiting verified radar precomputation' });
 Object.assign(I18N.fr, { 'case.pending': 'Calcul scientifique non archivé' });
 Object.assign(I18N.es, { 'case.pending': 'Pendiente de procesamiento verificado' });
+
+
+/* Final launch: common scientific case layout and careful claims for live scans. */
+Object.assign(I18N.ru, {
+ 'case.noArchive': 'Подтверждённые примеры готовятся. Выбери место на глобусе, чтобы выполнить собственный анализ NISAR.',
+ 'case.liveEventRadar': 'Между двумя датами радар NISAR зарегистрировал изменения обратного рассеяния в выбранном районе. Само событие пока не установлено.',
+ 'case.liveEventPhase': 'Получена интерферограмма NISAR по паре наблюдений. Она показывает относительную разность радарной фазы, а не подтверждённое смещение земли.',
+ 'case.liveCause.flood': 'Возможные причины: вода, влажность почвы, растительность и геометрия съёмки. Радар сам по себе не доказывает наводнение.',
+ 'case.liveCause.forest': 'Возможные причины: изменение растительности, уборка урожая, влажность почвы, сезонность и геометрия съёмки.',
+ 'case.liveCause.ground': 'Возможные причины: деформация поверхности, атмосфера, ионосфера и орбитальные погрешности. Для оценки смещений нужна дополнительная обработка.',
+ 'case.liveLimits': 'Наблюдаемое изменение — научный индикатор, а не подтверждённая карта последствий.',
+ 'case.scanUnavailable': 'Для этой точки не удалось получить подтверждённое радарное изображение. Выбери другую пару наблюдений или период.',
+ 'case.noConfirmedEvent': 'Анализ не завершился: по этим данным нельзя утверждать, что произошло событие.'
+});
+Object.assign(I18N.en, {
+ 'case.noArchive': 'Verified examples are being prepared. Choose a place on the globe to run a real NISAR analysis.',
+ 'case.liveEventRadar': 'NISAR measured a backscatter difference between two dates at this location. The physical event is not independently confirmed.',
+ 'case.liveEventPhase': 'NISAR produced an interferometric phase image from paired observations. It is not a certified ground-displacement map.',
+ 'case.liveCause.flood': 'Possible drivers include water, soil moisture, vegetation and observation geometry. Radar change alone does not prove flooding.',
+ 'case.liveCause.forest': 'Possible drivers include vegetation growth, harvest, soil moisture, seasonality and acquisition geometry.',
+ 'case.liveCause.ground': 'Possible drivers include surface motion, atmospheric and ionospheric delay and orbital errors. Further processing is needed for displacement.',
+ 'case.liveLimits': 'This is a radar-change indicator, not a verified damage or event map.',
+ 'case.scanUnavailable': 'No verified radar image was produced at this location. Try another location or date range.',
+ 'case.noConfirmedEvent': 'Analysis was not completed. The available evidence does not establish an event.'
+});
+Object.assign(I18N.fr, {
+ 'case.noArchive': 'Les exemples validés sont en préparation. Sélectionnez un lieu sur le globe pour analyser NISAR.',
+ 'case.liveEventRadar': 'NISAR a mesuré une différence de rétrodiffusion entre deux dates. Aucun événement précis n’est encore confirmé.',
+ 'case.liveEventPhase': 'NISAR a produit une phase interférométrique issue de deux acquisitions, pas une carte de déplacement certifiée.',
+ 'case.liveCause.flood': 'Causes possibles : eau, humidité du sol, végétation, géométrie. Le radar seul ne prouve pas une inondation.',
+ 'case.liveCause.forest': 'Causes possibles : croissance végétale, récolte, humidité, saisonnalité et géométrie.',
+ 'case.liveCause.ground': 'Causes possibles : déplacement, atmosphère, ionosphère et erreurs orbitales. Une correction est nécessaire.',
+ 'case.liveLimits': 'Indicateur radar, pas carte officielle des dommages.',
+ 'case.scanUnavailable': 'Aucune image radar vérifiée produite ici. Essayez d’autres dates ou un autre lieu.',
+ 'case.noConfirmedEvent': 'Le traitement n’a pas abouti ; aucun événement ne peut être confirmé.'
+});
+Object.assign(I18N.es, {
+ 'case.noArchive': 'Los ejemplos verificados están en preparación. Selecciona un lugar para analizar NISAR.',
+ 'case.liveEventRadar': 'NISAR midió una diferencia de retrodispersión entre dos fechas. El evento no está confirmado.',
+ 'case.liveEventPhase': 'NISAR produjo una imagen de fase interferométrica de observaciones emparejadas, no un mapa de desplazamiento certificado.',
+ 'case.liveCause.flood': 'Posibles causas: agua, humedad, vegetación y geometría. El radar no demuestra por sí solo una inundación.',
+ 'case.liveCause.forest': 'Posibles causas: crecimiento vegetal, cosecha, humedad, estación y geometría de adquisición.',
+ 'case.liveCause.ground': 'Posibles causas: movimiento, atmósfera, ionosfera y errores orbitales. Se requiere corrección adicional.',
+ 'case.liveLimits': 'Indicador de cambio radar, no mapa oficial de daños.',
+ 'case.scanUnavailable': 'No se produjo una imagen radar verificada aquí. Prueba otras fechas u otra ubicación.',
+ 'case.noConfirmedEvent': 'El análisis no terminó; no se puede confirmar un evento.'
+});
