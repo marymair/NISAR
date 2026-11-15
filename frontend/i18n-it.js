@@ -135,3 +135,7 @@ I18N.it = Object.assign({}, I18N.en, {
     'Scopri i risultati reali e apri i prodotti originali NASA ASF.'
   ]
 });
+Object.assign(I18N.it, {
+  'a.needPair': 'Servono due scene GCOV compatibili in date diverse (oppure un interferogramma GUNW).',
+  'live.imageexpired': 'Immagine non disponibile; ripeti l’analisi.'
+});
