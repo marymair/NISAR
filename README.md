@@ -77,3 +77,19 @@ Source code: [MIT License](LICENSE), copyright 2026 marymair; third-party librar
 ## Contest sources and user-facing accessibility
 
 NASA Space Apps 2026 [participant terms](https://www.spaceappschallenge.org/legal/) require citing **every** source, including open-source dependencies and imagery. The source documentation and case cards reference the original NASA studies. The published NASA images are clearly distinguished from the app's own on-demand numerical results. The observatory offers English, Russian, French, Spanish and Italian; two geographic map projections (3-D globe and 2-D flat map); a draggable, blinking, animated ZORI guide; and explicit "no compatible data" states rather than unrelated generic catalog fallbacks. The processor intentionally rejects locations outside ±85° latitude. The backend currently uses an in-memory job store; image links may expire when Cloud Run restarts.
+
+
+## Precomputed Cases — first-party NISAR radar image archive
+
+The **Examples** screen deliberately uses only PNGs computed by this application's scientific backend from authenticated NASA/ASF NISAR HDF5 granules. NASA article illustrations and remote photography are **not** embedded. Event background and cited NASA source links are separate from the radar measurements.
+
+After Cloud Shell has fetched the latest GitHub source, run the seed command from the repository root:
+
+```bash
+python3 tools/precompute_cases.py
+```
+
+This submits three science jobs to the already-deployed, Earthdata-authenticated Cloud Run service, polls their statuses, verifies authentic PNG output and provenance, and stores the resulting science imagery under `frontend/assets/cases/`. It also writes `frontend/case-data.js` and `frontend/assets/cases/manifest.json` with real image paths, dates and computed metrics. Then deploy the **local** Cloud Shell working directory with `gcloud run deploy zori-observatory --source . --project zori-nisar-observatory --region europe-west6 --allow-unauthenticated`. Optionally commit/push generated assets to GitHub so examples survive future clones.
+
+No credentials are exposed in this archive; authentication remains inside Cloud Run. The code reports a case as **not ready** when there are no compatible data or processing fails; it never creates placeholder science images. Confirmed GCOV cases (such as Mozambique) show an actual before/after radar comparison and change map. GUNW is a *paired interferometric phase result* and is shown as **one science image**, never mislabeled as two displacement photographs. A GCOV backscatter change does not prove the flood footprint or crop yield. Sources and cautions remain visible.
+
