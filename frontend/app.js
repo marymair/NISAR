@@ -72,7 +72,7 @@ function applyLang(lang) {
 }
 function updateToolLabels() {
   $('#btn-proj span').textContent = state.projection === 'globe' ? t('m.flat') : t('m.globe');
-  $('#btn-base span').textContent = t('m.' + state.base);
+  // Basemap control removed: the user chooses only globe or flat projection.
 }
 function applyTheme(th) {
   state.theme = th; store.set('zori.theme', th);
@@ -501,12 +501,13 @@ function renderResult() {
       <div>${media}${extra}</div>
       <div>
         ${facts.length ? `<h3>${esc(t('r.key'))}</h3><ul class="kf">${facts.map(f => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
+        <details class="science-disclosure"><summary>${esc(t('r.science'))}</summary>
         <h3>${esc(t('r.read'))}</h3><p>${esc(t('ch.' + ty + '.how'))}</p>
         <h3>${esc(t('r.pol'))}</h3><p>${esc(t('pol.' + ty))}</p>
         <h3>${esc(t('r.why'))}</h3><p>${esc(t('ch.' + ty + '.why'))}</p>
         <h3>${esc(t('r.trust'))}</h3><p>${esc(t('r.trustd'))}</p>
         <h3>${esc(t('r.future'))}</h3><p>${esc(t('r.futured'))}</p>
-        <p class="note">${esc(t('r.optical'))}</p>
+        <p class="note">${esc(t('r.optical'))}</p></details>
         <p style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn primary" id="explain-btn">${esc(t('r.explain'))}</button>
           <a class="btn" style="text-decoration:none;color:inherit" href="${esc(vertex)}" target="_blank" rel="noopener">${esc(t('r.vertex'))}</a>
@@ -571,7 +572,7 @@ function bind() {
     try { map.setProjection({ type: state.projection }); } catch (e) { console.warn(e); }
     updateToolLabels(); zoriSay(t('z.map'));
   };
-  $('#btn-base').onclick = () => { state.base = BASES[(BASES.indexOf(state.base) + 1) % BASES.length]; updateBasemap(); updateToolLabels(); };
+
   $('#search-form').onsubmit = async e => {
     e.preventDefault();
     const q = $('#search').value.trim(); if (!q) return;
