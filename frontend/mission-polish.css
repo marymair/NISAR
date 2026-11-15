@@ -232,3 +232,15 @@ html[data-theme="light"] #result .unified-science-report .case-summary { color: 
     padding: 8px 10px; white-space: nowrap; }
   body[data-screen="app"] .controls { margin-left: auto; }
 }
+
+
+/* Science gallery: ZORI remains on mission screens but no longer obscures
+   archived comparisons or their buttons when the Examples tab is active. */
+body[data-view="cases"] #zori-widget { display: none !important; }
+#view-cases .case-feature .science-product-note,
+#result .science-product-note { color: var(--muted); line-height: 1.55;
+  font-size: .89rem; margin: 12px 2px 20px; }
+#view-cases .case-feature .compare-group,
+#result .compare-group { max-width: 100%; }
+#view-cases .case-feature .compare-slider-row .compare-range,
+#result .compare-slider-row .compare-range { touch-action: pan-y; }
