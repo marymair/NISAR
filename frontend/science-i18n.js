@@ -60,3 +60,60 @@ Object.assign(I18N.es, {
  'live.storylink': 'Ver el estudio y las imágenes originales de NASA',
  'live.curated': 'Estudio de caso publicado por NASA. El análisis a petición requiere datos científicos NISAR compatibles.'
 });
+
+
+/* Mission clarity: distinguish archive search from successful processing,
+ * preserve reference imagery, and localize the new controls.
+ */
+Object.assign(I18N.en, {
+  'a.btn': 'Analyze this place',
+  'a.polar': 'Polar region: this processor supports coordinates from 85°S to 85°N. No verified scene is reported here.',
+  'r.science': 'Science details & limitations',
+  'r.optical': 'The globe is optical context; the radar result is displayed in the analysis panel.',
+  'live.nasaimage': 'Official NASA reference visualization (not computed by ZORI)',
+  'live.curated': 'Published NASA science imagery, credited separately. Click Analyze this place for an independent live NISAR calculation.',
+  'live.fail': 'The live science calculation did not finish here. Published NASA imagery is shown as a separate reference.',
+  'z.theme': 'I changed the colors of our alien control room!',
+  'z.map': 'Changing our view of Earth. Same planet, different perspective!',
+  'z.language': 'Transmission translated into your Earth language!',
+  'z.scan': 'Radar antenna deployed! I am checking the NISAR echoes.'
+});
+Object.assign(I18N.ru, {
+  'a.btn': 'Анализировать место',
+  'a.polar': 'Полярный район: эта версия обрабатывает точки от 85° ю. ш. до 85° с. ш. Здесь подтверждённых сцен нет.',
+  'r.science': 'Научные пояснения и ограничения',
+  'r.optical': 'Глобус показывает обычную карту Земли. Радарные снимки появляются в результатах анализа.',
+  'live.nasaimage': 'Официальная иллюстрация NASA (не расчёт ZORI)',
+  'live.curated': 'Это реальное изображение NASA с указанием автора. Чтобы получить собственный расчёт ZORI, нажми «Анализировать место».',
+  'live.fail': 'Для этой точки научная обработка не завершилась. Ниже показан отдельно подписанный опубликованный снимок NASA.',
+  'z.theme': 'Переключаю освещение космической лаборатории!',
+  'z.map': 'Меняем ракурс Земли! Новый обзор, тот же сигнал.',
+  'z.language': 'Настраиваю переводчик земных языков!',
+  'z.scan': 'Радар включён! Слушаю сигналы NISAR.'
+});
+Object.assign(I18N.fr, {
+  'a.btn': 'Analyser ce lieu',
+  'a.polar': 'Zone polaire : cet outil accepte les points entre 85°S et 85°N. Aucune scène vérifiée ici.',
+  'r.science': 'Explications scientifiques et limites',
+  'r.optical': 'Le globe présente le contexte optique. Le radar apparaît dans les résultats.',
+  'live.nasaimage': 'Visualisation officielle NASA (pas un calcul ZORI)',
+  'live.curated': 'Image scientifique NASA avec attribution. Lancez Analyser ce lieu pour calculer une comparaison NISAR.',
+  'live.fail': 'Le traitement scientifique a échoué ici. Une image officielle NASA est indiquée séparément.',
+  'z.theme': 'Je change les lumières de la station spatiale !',
+  'z.map': 'Nouvelle perspective sur la Terre !',
+  'z.language': 'J’ai réglé mon traducteur terrestre !',
+  'z.scan': 'Radar activé ! Je cherche les échos NISAR.'
+});
+Object.assign(I18N.es, {
+  'a.btn': 'Analizar este lugar',
+  'a.polar': 'Zona polar: este procesador admite puntos de 85°S a 85°N. No hay escenas verificadas aquí.',
+  'r.science': 'Detalles científicos y limitaciones',
+  'r.optical': 'El globo muestra el contexto óptico. Los resultados radar aparecen en el panel de análisis.',
+  'live.nasaimage': 'Visualización oficial NASA (no calculada por ZORI)',
+  'live.curated': 'Imagen científica de NASA con créditos. Pulsa Analizar este lugar para calcular un resultado NISAR nuevo.',
+  'live.fail': 'No se completó el análisis científico en este lugar. Se muestra una imagen oficial de NASA por separado.',
+  'z.theme': '¡Cambio las luces de la nave!',
+  'z.map': '¡Una nueva perspectiva de la Tierra!',
+  'z.language': '¡Traductor terrestre actualizado!',
+  'z.scan': '¡Radar activado! Buscando ecos NISAR.'
+});
