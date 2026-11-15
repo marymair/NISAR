@@ -29,9 +29,13 @@ def test_case_archive_loaded_before_frontend_start():
     assert HTML.index('src="samples.js"') < HTML.index('src="case-data.js"') < HTML.index('src="app.js"')
 
 
-def test_scientific_panels_have_a_slider_for_real_gcov_only():
+def test_scientific_panels_have_sliders_for_real_science_layers():
     assert "bindCompareSliders($('#cases-grid'))" in APP
     assert "s.before && s.after" in APP
+    assert "data.coherence || data.coherenceImg" in APP
+    assert "t('case.coherence')" in APP
+    assert "t('case.phaseShort')" in APP
+    assert '"difference", "coherence"' in SCRIPT
     assert "t('case.phase')" in APP
     assert "case.event" in APP
     assert "case.cause" in APP
