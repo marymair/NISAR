@@ -152,3 +152,16 @@ Object.assign(I18N.it, {
 });
 
 Object.assign(I18N.it, { 'case.pending': 'Elaborazione scientifica da completare' });
+
+
+Object.assign(I18N.it, {
+ 'case.noArchive': 'Gli esempi verificati sono in preparazione. Scegli un luogo per analizzare NISAR.',
+ 'case.liveEventRadar': 'NISAR ha misurato una differenza di retrodiffusione tra due date. L’evento fisico non è confermato.',
+ 'case.liveEventPhase': 'NISAR ha prodotto una fase interferometrica da osservazioni accoppiate, non una mappa certificata di spostamento.',
+ 'case.liveCause.flood': 'Possibili cause: acqua, umidità del terreno, vegetazione e geometria. Il radar da solo non dimostra un’alluvione.',
+ 'case.liveCause.forest': 'Possibili cause: crescita delle piante, raccolto, umidità, stagionalità e geometria di acquisizione.',
+ 'case.liveCause.ground': 'Possibili cause: movimento del terreno, atmosfera, ionosfera ed errori orbitali; servono correzioni.',
+ 'case.liveLimits': 'Questo è un indicatore radar di cambiamento, non una mappa certificata dei danni.',
+ 'case.scanUnavailable': 'Nessuna immagine radar verificata prodotta qui. Prova altre date o un altro luogo.',
+ 'case.noConfirmedEvent': 'L’analisi non è stata completata; l’evento non può essere confermato.'
+});
