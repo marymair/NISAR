@@ -611,7 +611,7 @@ function renderCases() {
     const dates = (s.sources || []).map(v => esc(String(v.date || '').slice(0, 10))).filter(Boolean).join(' → ');
     return `<article class="card case-card case-feature">
         <div class="case-media">
-          <span class="case-type">${esc(t('case.archived'))} · NISAR</span>
+          <span class="case-type">${esc(t(s.precomputed ? 'case.archived' : 'case.pending'))} · NISAR</span>
           ${image}
         </div>
         <div class="case-summary">
