@@ -172,3 +172,25 @@ Object.assign(I18N.it, {
  'case.phaseShort': 'Fase',
  'case.phaseCompare': 'Trascina per confrontare la coerenza misurata con la fase interferometrica della stessa coppia NISAR. Non sono foto prima/dopo né una mappa di spostamento corretta.'
 });
+
+
+/* Final hero and science interpretation — original Italian translation. */
+Object.assign(I18N.it, {
+  'intro.eyebrow': 'TRASMISSIONE URGENTE DALLO SPAZIO GALATTICO',
+  'intro.title': 'Abbiamo trovato un pianeta che non smette mai di danzare',
+  'intro.lead': 'Gli alieni hanno scoperto la Terra. La sua superficie cambia continuamente: l’acqua sale, le foreste bruciano, il suolo trema. Unisciti a ZORI e leggi questi cambiamenti nei dati radar del satellite NISAR.',
+  'intro.credit': 'NISAR è una vera missione satellitare di NASA e ISRO. ZORI è la nostra guida aliena immaginaria che spiega dati scientifici autentici.',
+  'guide.open': 'Come leggere queste immagini',
+  'guide.gcov1': 'Prima e Dopo mostrano osservazioni radar dello stesso luogo in date diverse. Trascina il cursore per confrontarle.',
+  'guide.gcov2': 'I toni grigi indicano l’intensità dell’eco radar. Scuro non significa necessariamente acqua.',
+  'guide.gcov3': 'Differenza evidenzia i cambiamenti di segnale. La soglia di 3 dB non certifica il perimetro di un’alluvione.',
+  'guide.phase1': 'La coerenza descrive quanto è stabile il segnale tra le acquisizioni; le aree chiare sono più affidabili.',
+  'guide.phase2': 'La fase indica una differenza di fase radar in radianti, non direttamente lo spostamento del suolo.',
+  'guide.phase3': 'Il cursore confronta due strati scientifici della stessa coppia NISAR, non fotografie prima/dopo.',
+  'guide.caution': 'Umidità, vegetazione e condizioni di ripresa possono modificare il segnale. Servono ulteriori verifiche.',
+  'guide.lab': 'Approfondisci nel laboratorio scientifico',
+  'guide.source': 'Catalogo originale NASA ASF Vertex',
+  'lab.archive.t': 'Dati originali e ASF Vertex',
+  'lab.archive.d': 'ZORI elabora veri prodotti della missione NASA–ISRO NISAR. ASF Vertex consente di verificare scene, date e tipi di prodotto.',
+  'lab.archive.link': 'Apri l’archivio NISAR in ASF Vertex'
+});
