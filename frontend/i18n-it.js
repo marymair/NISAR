@@ -139,3 +139,14 @@ Object.assign(I18N.it, {
   'a.needPair': 'Servono due scene GCOV compatibili in date diverse (oppure un interferogramma GUNW).',
   'live.imageexpired': 'Immagine non disponibile; ripeti l’analisi.'
 });
+
+Object.assign(I18N.it, {
+  'case.event': 'Che cosa è successo:', 'case.cause': 'Causa e interpretazione:',
+  'case.satellite': 'Osservazioni NISAR', 'case.archived': 'Elaborazione ZORI',
+  'case.scienceSource': 'Fonte scientifica NASA',
+  'case.notReady': 'Le immagini radar NISAR autentiche non sono ancora state archiviate per questo caso.',
+  'case.phase': 'Fase interferometrica GUNW da due acquisizioni, non due fotografie prima/dopo.',
+  'case.inspect': 'Esplora questo luogo',
+  'case.metricGCOV': 'Variazione mediana: {median} dB · |Δ| ≥ 3 dB nel {fraction}% dei pixel validi; non è un’area di evento verificata.',
+  'case.metricGUNW': 'Intervallo interquartile della fase relativa: {phase} radianti.'
+});
