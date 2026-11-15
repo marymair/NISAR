@@ -586,8 +586,6 @@ function renderResult() {
     const dates = (s.sources || []).map(v => String(v.date || '').slice(0, 10)).filter(Boolean);
     if (dates.length) summary += '<p class="credit">' + esc(t('case.satellite')) +
       ': ' + esc(dates.join(' → ')) + '</p>';
-    if (s.sourceUrl) summary += '<p class="credit"><a href="' + esc(s.sourceUrl) +
-      '" target="_blank" rel="noopener noreferrer">' + esc(t('case.scienceSource')) + '</a></p>';
     if (R && R.liveFailed) summary += '<p class="scan-error">' +
       esc(t('live.fail')) + (R.liveError ? ' · ' + esc(R.liveError) : '') + '</p>';
   } else if (live) {
@@ -618,13 +616,7 @@ function renderResult() {
       })) + '</p>';
     }
     summary += '<p class="note">' + esc(t('case.liveLimits')) + '</p>';
-    if (live.method) summary += '<details><summary>' + esc(t('r.science')) +
-      '</summary><p class="note">' + esc(live.method) + '</p><p class="note">' +
-      esc(t('live.warning')) + '</p></details>';
-    if (live.sources && live.sources.length) summary += '<details><summary>' +
-      esc(t('live.sources')) + '</summary><ul class="scene-list">' +
-      live.sources.map(v => '<li>' + esc(v.id || '') + ' · ' +
-        esc(v.date || '') + '</li>').join('') + '</ul></details>';
+
   } else {
     // A server error must not become an attractive but unrelated NASA thumbnail.
     badge = t('case.pending');
@@ -643,16 +635,22 @@ function renderResult() {
     '<div class="case-media"><span class="case-type">' + esc(badge) +
     ' · NISAR</span>' + media + '</div>' +
     '<div class="case-summary">' + summary +
+    '<p class="result-actions"><button class="btn primary" id="explain-btn">' +
+    esc(t('r.explain')) + '</button><button class="btn" type="button" data-open-lab>' +
+    esc(t('guide.lab')) + '</button></p>' +
     '<details class="science-disclosure"><summary>' + esc(t('r.science')) +
     '</summary><h3>' + esc(t('r.read')) + '</h3><p>' +
     esc(t('ch.' + ty + '.how')) + '</p><h3>' + esc(t('r.trust')) +
-    '</h3><p>' + esc(t('r.trustd')) + '</p></details>' +
-    '<p class="result-actions"><button class="btn primary" id="explain-btn">' +
-    esc(t('r.explain')) + '</button><a class="btn" href="' + esc(vertex) +
-    '" target="_blank" rel="noopener noreferrer">' + esc(t('r.vertex')) +
-    '</a></p>' +
+    '</h3><p>' + esc(t('r.trustd')) + '</p>' +
+    (live && live.method ? '<p class="note">' + esc(live.method) + '</p>' : '') +
     (list ? '<details><summary>' + esc(t('r.scenes')) +
       '</summary><ul class="scene-list">' + list + '</ul></details>' : '') +
+    '<p class="source-credit"><a href="' + esc(vertex) +
+    '" target="_blank" rel="noopener noreferrer">' + esc(t('guide.source')) + '</a></p>' +
+    (s && s.sourceUrl ? '<p class="source-credit"><a href="' +
+      esc(s.sourceUrl) + '" target="_blank" rel="noopener noreferrer">' +
+      esc(t('case.scienceSource')) + '</a></p>' : '') +
+    '</details>' +
     '</div></div>';
   $$('img.single', el).forEach(img => {
     img.onerror = () => {
@@ -725,6 +723,7 @@ function bind() {
   $$('.nav button').forEach(b => { b.onclick = () => showView(b.dataset.view); });
   $$('.change-card').forEach(b => { b.onclick = () => { setChange(b.dataset.change); setHash(); }; });
   document.addEventListener('click', e => { const c = e.target.closest('[data-sample]'); if (c) openSample(c.dataset.sample); });
+  document.addEventListener('click', e => { if (e.target.closest('[data-open-lab]')) showView('lab'); });
 
   const menu = $('#lang-menu'), lb = $('#lang-btn');
   lb.onclick = e => { e.stopPropagation(); menu.hidden = !menu.hidden; lb.setAttribute('aria-expanded', String(!menu.hidden)); };
