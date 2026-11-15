@@ -62,6 +62,11 @@ assert.equal(doc.querySelectorAll('#intro-cases .case-card').length, 2, 'Only tw
 assert.equal(doc.querySelectorAll('#cases-grid .case-card').length, 2, 'Incomplete crops case stays hidden');
 assert.equal(doc.querySelectorAll('#cases-grid .case-feature').length, 2, 'Both verified science cases appear');
 assert.equal(doc.querySelectorAll('#cases-grid .compare-group').length, 2, 'GCOV and real GUNW science-layer comparisons both have sliders');
+assert.equal(doc.querySelectorAll('#cases-grid .reading-guide').length, 2, 'Each real radar example must explain its own visual immediately below images');
+assert.equal(doc.querySelectorAll('#cases-grid [data-open-lab]').length, 2, 'Each archived case links directly to the Science Lab');
+assert.ok(doc.querySelector('#view-lab .lab-archive a[href^="https://search.asf.alaska.edu/"]'), 'NASA ASF Vertex belongs in Science Lab');
+assert.ok(doc.querySelector('#intro .earth-scanner'), 'Hero has an Earth scan overlay');
+assert.ok(doc.querySelector('#intro .mission-attribution'), 'Mission credits real NASA and ISRO owners');
 assert.match(doc.querySelector('#cases-grid').textContent, /Coherence|Когерентность/, 'GUNW comparison uses correct labels, not fake Before/After');
 assert.doesNotMatch(doc.querySelector('#cases-grid').textContent, /Maize Triangle|Кукурузный треугольник/, 'Unprepared South Africa case is hidden');
 assert.match(doc.querySelector('#cases-grid').textContent, /Cause|Причина|Cause and interpretation/);
@@ -83,6 +88,9 @@ const russian = doc.querySelector('#lang-menu [data-lang="ru"]');
 russian.click();
 assert.equal(doc.documentElement.lang, 'ru');
 assert.match(text('.hero h1'), /планету/i);
+assert.match(text('.hero .transmit'), /СРОЧНОЕ СООБЩЕНИЕ/, 'Russian emergency signal must render');
+assert.match(text('.hero .mission-attribution'), /NASA и ISRO/, 'Russian hero must attribute NISAR properly');
+assert.match(doc.querySelector('#cases-grid .reading-guide > summary').textContent, /Как читать эти снимки/, 'Reading guide accessible in Russian');
 assert.equal(doc.querySelectorAll('#intro-cases .case-card').length, 2);
 
 doc.querySelector('#theme-toggle').click();
