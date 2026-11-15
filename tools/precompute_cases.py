@@ -98,12 +98,15 @@ def archive_case(base: str, name: str, spec: dict, max_wait: int) -> dict:
         raise RuntimeError("Cloud Run did not return a job ID: " + str(job)[:250])
     started = time.monotonic()
     last_status = None
+    last_report = -100.0
     while time.monotonic() - started < max_wait:
         info = request_json(base + "/status/" + urllib.parse.quote(str(job_id), safe=""))
         status = info.get("status")
-        if status != last_status:
-            print(f"[{name}] {status}", flush=True)
+        elapsed = time.monotonic() - started
+        if status != last_status or elapsed - last_report > 30:
+            print(f"[{name}] {status} · {int(elapsed)}s elapsed", flush=True)
             last_status = status
+            last_report = elapsed
         if status == "error":
             raise RuntimeError("NISAR processing failed: " + str(info.get("error"))[:450])
         if status == "done":
