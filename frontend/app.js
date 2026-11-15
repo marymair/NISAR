@@ -135,6 +135,8 @@ function enterApp(view = 'mission') {
   }, 430);
 }
 function showView(v) {
+  document.body.dataset.view = v;
+  if (v === 'cases') $('#zori-widget').classList.remove('open'); // do not cover the science gallery
   ['mission', 'cases', 'lab'].forEach(n => { $('#view-' + n).hidden = n !== v; });
   $$('.nav button').forEach(b => b.setAttribute('aria-current', b.dataset.view === v ? 'page' : 'false'));
   if (v === 'mission' && map) setTimeout(() => map.resize(), 50);
