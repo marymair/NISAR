@@ -150,3 +150,5 @@ Object.assign(I18N.it, {
   'case.metricGCOV': 'Variazione mediana: {median} dB · |Δ| ≥ 3 dB nel {fraction}% dei pixel validi; non è un’area di evento verificata.',
   'case.metricGUNW': 'Intervallo interquartile della fase relativa: {phase} radianti.'
 });
+
+Object.assign(I18N.it, { 'case.pending': 'Elaborazione scientifica da completare' });
