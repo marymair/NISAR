@@ -37,3 +37,15 @@ def test_companion_animations_and_accessible_reference_imagery():
     assert "suppressClickUntil" in ZORI
     assert "svs.gsfc.nasa.gov" in SAMPLES
     assert "assets.science.nasa.gov" in SAMPLES
+
+
+def test_before_after_slider_has_visible_thumb_and_synced_controls():
+    css = (ROOT / "frontend/mission-polish.css").read_text(encoding="utf8")
+    assert 'class="compare-group"' in APP
+    assert 'class="compare-overlay"' in APP
+    assert 'class="compare-range"' in APP
+    assert 'class="c-grip"' in APP
+    assert "cmp.style.setProperty('--pos', pos + '%')" in APP
+    assert "sliders.forEach(slider => slider.addEventListener('input'" in APP
+    assert "touch-action: pan-y" in css
+    assert "html[data-theme=\"light\"] #result .compare-slider-row" in css
