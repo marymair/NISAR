@@ -621,6 +621,7 @@ function renderCases() {
           <p><strong>${esc(t('case.cause'))}</strong> ${esc(cause)}</p>
           ${dates ? `<p class="credit">${esc(t('case.satellite'))}: ${dates}</p>` : ''}
           ${caseMetric(s) ? `<p class="case-measure">${esc(caseMetric(s))}</p>` : ''}
+          ${s.sources?.length ? `<details><summary>${esc(t('live.sources'))}</summary><ul class="scene-list">${s.sources.map(x => `<li>${esc(x.id)} · ${esc(String(x.date || '').slice(0, 10))}</li>`).join('')}</ul></details>` : ''}
           <p class="credit"><a href="${esc(s.sourceUrl)}" target="_blank" rel="noopener noreferrer">${esc(t('case.scienceSource'))}</a></p>
           <button class="btn primary" type="button" data-sample="${esc(s.id)}">${esc(t('case.inspect'))}</button>
         </div>
