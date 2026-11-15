@@ -228,3 +228,26 @@ Object.assign(I18N.es, {
  'case.scanUnavailable': 'No se produjo una imagen radar verificada aquí. Prueba otras fechas u otra ubicación.',
  'case.noConfirmedEvent': 'El análisis no terminó; no se puede confirmar un evento.'
 });
+
+
+/* Accessible two-layer GUNW comparison: scientifically not before / after. */
+Object.assign(I18N.ru, {
+ 'case.coherence': 'Когерентность',
+ 'case.phaseShort': 'Фаза',
+ 'case.phaseCompare': 'Двигай ползунок: слева когерентность сигнала, справа интерферометрическая фаза одной пары наблюдений NISAR. Это не снимки «до/после» и не готовая карта смещений.'
+});
+Object.assign(I18N.en, {
+ 'case.coherence': 'Coherence',
+ 'case.phaseShort': 'Phase',
+ 'case.phaseCompare': 'Drag to compare measured coherence with interferometric phase from the same NISAR acquisition pair. These are not before/after photographs or a corrected displacement map.'
+});
+Object.assign(I18N.fr, {
+ 'case.coherence': 'Cohérence',
+ 'case.phaseShort': 'Phase',
+ 'case.phaseCompare': 'Déplacez le curseur pour comparer cohérence mesurée et phase interférométrique de la même paire NISAR. Ce ne sont pas deux photos avant/après.'
+});
+Object.assign(I18N.es, {
+ 'case.coherence': 'Coherencia',
+ 'case.phaseShort': 'Fase',
+ 'case.phaseCompare': 'Desliza para comparar la coherencia medida con la fase interferométrica de la misma pareja NISAR. No son fotografías antes/después.'
+});
