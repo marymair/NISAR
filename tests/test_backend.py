@@ -87,3 +87,37 @@ def test_invalid_date_range():
         "change": "flood",
     })
     assert r.status_code == 400
+
+
+
+def test_real_gunw_phase_and_coherence_layers_both_render(monkeypatch, tmp_path):
+    """GUNW comparison contains two *measured layers* from the same HDF5 grid.
+    These are not imaginary before/after photos. Test inputs are local fixtures.
+    """
+    path = tmp_path / "gunw_fixture.h5"
+    xs = np.linspace(29.99, 30.01, 128)
+    ys = np.linspace(5.01, 4.99, 128)
+    with h5py.File(path, "w") as f:
+        group = f.require_group(
+            "/science/LSAR/GUNW/grids/frequencyA/unwrappedInterferogram"
+        )
+        group.create_dataset("xCoordinates", data=xs)
+        group.create_dataset("yCoordinates", data=ys)
+        group.create_dataset("projection", data=4326)
+        pol = group.require_group("HH")
+        phase = np.linspace(-3, 3, 128 * 128, dtype="float32").reshape(128, 128)
+        pol.create_dataset("unwrappedPhase", data=phase)
+        pol.create_dataset("coherenceMagnitude", data=np.full((128, 128), 0.85, dtype="float32"))
+
+    @contextmanager
+    def fake_open(_url):
+        with h5py.File(path, "r") as f:
+            yield f
+
+    monkeypatch.setattr(nisar_proc, "open_remote_h5", fake_open)
+    output = nisar_proc.process_gunw({"url": "offline-fixture"}, 5.0, 30.0)
+    assert output["stats"]["mode"] == "gunw_unwrapped_phase"
+    assert output["stats"]["has_coherence_layer"] is True
+    assert set(output["images"]) == {"difference", "coherence"}
+    assert all(png.startswith(b"\x89PNG\r\n\x1a\n") for png in output["images"].values())
+    assert output["images"]["difference"] != output["images"]["coherence"]
