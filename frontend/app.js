@@ -64,7 +64,7 @@ function applyLang(lang) {
   $$('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
   $$('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
   $('#lang-current').textContent = lang.toUpperCase();
-  $$('#lang-menu [data-lang]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.lang === lang)));
+  $$$('#lang-menu [data-lang]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.lang === lang)));
   updateToolLabels();
   renderSignal(); renderCases(); startNotes(); refreshPanel(); renderTimeline(); renderResult();
   if ($('#explain').open) fillExplain();
@@ -530,11 +530,11 @@ function renderResult() {
         ${list ? `<details><summary>${esc(t('r.scenes'))}</summary><ul class="scene-list">${list}</ul></details>` : ''}
       </div>
     </div>`;
-  $('img.single', el).forEach(i => { i.onerror = () => { const n = document.createElement('p'); n.className = 'scan-error'; n.textContent = t('live.imageexpired'); i.replaceWith(n); }; });
+  $$('img.single', el).forEach(i => { i.onerror = () => { const n = document.createElement('p'); n.className = 'scan-error'; n.textContent = t('live.imageexpired'); i.replaceWith(n); }; });
   $('#explain-btn', el).onclick = openExplain;
   const cmp = $('.compare', el);
   if (cmp) {
-    $('.compare img', el).forEach(img => {
+    $$('.compare img', el).forEach(img => {
       img.onerror = () => {
         if (!cmp.isConnected) return;
         const info = document.createElement('p');
