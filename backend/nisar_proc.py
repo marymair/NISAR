@@ -191,7 +191,8 @@ def process_gunw(scene: dict, lat: float, lon: float):
         pol = polarizations[0]
         phase, xs, ys, epsg = _extract(f, stem + "/" + pol + "/unwrappedPhase", lon, lat)
         coh_path = stem + "/" + pol + "/coherenceMagnitude"
-        if coh_path in f:
+        has_coherence = coh_path in f
+        if has_coherence:
             coh, cx, cy, ce = _extract(f, coh_path, lon, lat)
             coh = _regrid(coh, cx, cy, ce, xs, ys, epsg)
         else:
@@ -217,8 +218,22 @@ def process_gunw(scene: dict, lat: float, lon: float):
         "interpretation": "Real unwrapped interferometric phase from a paired NISAR observation.",
         "caution": "Not a corrected displacement map. Atmospheric, ionospheric, orbital and reference-phase corrections are required.",
     }
+    images = {"difference": _png_rgb(np.clip(rgb, 0, 255))}
+    if has_coherence:
+        # A second *real* GUNW layer: coherence magnitude (0..1), not a
+        # fabricated pre-event photograph. Both grids are co-registered.
+        good = np.isfinite(coh)
+        strength = np.clip(np.where(good, coh, 0), 0, 1)
+        coherence_rgb = np.empty((*strength.shape, 3), dtype="uint8")
+        coherence_rgb[:, :, 0] = (12 + 32 * strength).astype("uint8")
+        coherence_rgb[:, :, 1] = (20 + 215 * strength).astype("uint8")
+        coherence_rgb[:, :, 2] = (33 + 210 * strength).astype("uint8")
+        coherence_rgb[~good] = (14, 14, 18)
+        images["coherence"] = _png_rgb(coherence_rgb)
+    stats["has_coherence_layer"] = bool(has_coherence)
     return {
-        "images": {"difference": _png_rgb(np.clip(rgb, 0, 255))},
+        "images": images,
         "stats": stats,
-        "method": "GUNW unwrapped phase (radians), masked where coherence <0.35.",
+        "method": "GUNW unwrapped phase (radians), masked where coherence <0.35. "
+                  "Optional second image is the measured coherence layer (not a before image).",
     }
