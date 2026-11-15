@@ -25,7 +25,7 @@ const state = {
   lang: 'en', theme: 'dark', change: null,
   point: null, place: null, scenes: [], status: 'idle',
   report: null, sample: null, projection: 'globe', base: 'sat',
-  range: { from: PUBLIC_START, to: iso(new Date()) }, exLevel: 1
+  range: { from: PUBLIC_START, to: iso(new Date()) }, exLevel: 1, polarOutside: false
 };
 let map, marker, reqId = 0, spin = true, noteIdx = 0, noteTimer, mapReady = false;
 const whenMapReady = fn => (mapReady ? fn() : map.once('load', fn));
@@ -84,7 +84,7 @@ function setChange(id) {
   state.change = id;
   if (id) document.documentElement.dataset.change = id; else delete document.documentElement.dataset.change;
   $$('.change-card').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.change === id)));
-  if (id) zoriSay(t('z.' + id));
+  if (id) { zoriSay(t('z.' + id)); window.setZoriEmotion?.(id === 'ground' ? 'detective' : id === 'flood' ? 'wave' : 'curious'); }
   if (state.point) recheck();
   if (map && mapReady) setTimeout(paintAccent, 800);
   refreshPanel();
@@ -236,6 +236,7 @@ async function recheck() {
   if (!state.point) return;
   const token = ++reqId;
   state.status = 'checking'; state.scenes = []; state.report = null;
+  state.sample = null;
   refreshPanel(); renderTimeline(); renderResult();
   await checkData(state.point.lat, state.point.lng, token);
 }
@@ -247,14 +248,17 @@ async function selectPoint(ll, opts = {}) {
   const token = ++reqId;
   state.point = { lat, lng }; state.place = null; state.scenes = [];
   state.status = 'checking'; state.report = null; state.sample = opts.sample || null;
+  state.polarOutside = Math.abs(lat) > 85;
   whenMapReady(() => { drawFootprints([]); if (!opts.sample) clearOverlay(); });
   if (!marker) { const el = document.createElement('div'); el.className = 'pin'; marker = new maplibregl.Marker({ element: el }); }
   marker.setLngLat([lng, lat]).addTo(map);
   map.flyTo({ center: [lng, lat], zoom: opts.zoom || Math.max(map.getZoom(), 4.5), speed: 0.9 });
   refreshPanel(); renderTimeline(); renderResult(); setHash();
+  if (Math.abs(lat) > 85) zoriSay(t('a.polar'));
   await Promise.allSettled([geocode(lat, lng, token), checkData(lat, lng, token)]);
 }
 async function geocode(lat, lng, token) {
+  if (lat <= -75) { if (token === reqId) { state.place = { name: 'Antarctica / polar region', region: '', country: 'Antarctica' }; refreshPanel(); } return; }
   try {
     const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&lat=${lat}&lon=${lng}&accept-language=${state.lang}`);
     const j = await r.json();
@@ -269,6 +273,10 @@ async function geocode(lat, lng, token) {
 }
 /* Is there any NISAR product over this exact point, inside the chosen dates? (ASF DAAC SearchAPI, no login for search) */
 async function checkData(lat, lng, token) {
+  if (Math.abs(lat) > 85) {
+    if (token === reqId) { state.scenes = []; state.status = 'none'; state.polarOutside = true; refreshPanel(); renderTimeline(); }
+    return;
+  }
   const direct = 'https://api.daac.asf.alaska.edu/services/search/param?dataset=NISAR&maxResults=300&output=geojson'
     + `&start=${state.range.from}T00:00:00Z&end=${state.range.to}T23:59:59Z`
     + '&intersectsWith=' + encodeURIComponent(`POINT(${lng} ${lat})`);
@@ -281,7 +289,9 @@ async function checkData(lat, lng, token) {
   try {
     let response = LIVE ? await fetch(API_BASE + '/api/search?' + params, { signal: ctl.signal }) : null;
     if (!response || !response.ok) {
-      // Public ASF Search API remains a backup if the Cloud Run API is not deployed yet.
+      // Never replace a failed product-specific catalog search with an unfiltered
+      // generic NISAR search: it can falsely claim hundreds of unrelated scenes.
+      if (LIVE) throw new Error('NASA ASF catalog HTTP ' + (response ? response.status : 'unavailable'));
       response = await fetch(direct, { signal: ctl.signal });
     }
     if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -319,13 +329,14 @@ function refreshPanel() {
   if (state.status === 'found') {
     const dates = state.scenes.map(s => s.startTime).filter(Boolean);
     d = t('s.foundd', { n: state.scenes.length, levels: levelSummary(), from: fmtDate(dates[0]), to: fmtDate(dates.at(-1)) });
-  } else if (state.status === 'none') d = t('s.noned');
+  } else if (state.status === 'none') d = state.polarOutside ? t('a.polar') : t('s.noned');
   else if (state.status === 'error') d = t('s.errd');
   $('#status-detail').textContent = d;
   let why = '';
   if (!state.change) why = t('a.needType');
   else if (!p) why = t('a.needPlace');
   else if (state.status === 'checking') why = t('s.checking');
+  else if (state.polarOutside) why = t('a.polar');
   else if (state.status !== 'found') why = t('a.needData');
   $('#analyze').disabled = !!why; $('#analyze-why').textContent = why;
   $('#copy').disabled = !p;
@@ -336,7 +347,7 @@ function renderTimeline() {
   const byM = {};
   sc.forEach(s => { const k = (s.startTime || '').slice(0, 7); if (k) byM[k] = (byM[k] || 0) + 1; });
   const keys = Object.keys(byM).sort(); const max = Math.max(...Object.values(byM));
-  box.innerHTML = `<div class="bars">${keys.map(k => `<div class="bar" title="${k}: ${byM[k]}"><i style="height:${Math.max(8, byM[k] / max * 100)}%"></i><span>${k.slice(2)}</span></div>`).join('')}</div>`;
+  box.innerHTML = `<div class="bars">${keys.map(k => `<div class="bar" title="${k}: ${byM[k]}"><strong class="bar-count" aria-label="${byM[k]} scenes">${byM[k]}</strong><i style="height:${Math.max(12, byM[k] / max * 78)}%"></i><span>${k.slice(5)}/${k.slice(2,4)}</span></div>`).join('')}</div>`;
 }
 function setHash() {
   if (!state.point) return;
@@ -387,17 +398,18 @@ async function liveAnalyze() {
   throw new Error('Analysis timed out');
 }
 async function runScan() {
+  if (!state.point || state.status !== 'found' || state.polarOutside) { zoriSay(t('a.needData')); return; }
   const sc = $('#scanner'); const pt = map.project([state.point.lng, state.point.lat]);
   sc.style.left = pt.x + 'px'; sc.style.top = pt.y + 'px';
   sc.classList.add('on'); scanMsg(t('scan.text'));
   window.setZoriEmotion?.('thinking');
   $('#map-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
-  let live = null, liveFailed = false;
+  let live = null, liveFailed = false, liveError = '';
   if (LIVE) {
-    try { live = await liveAnalyze(); } catch (e) { console.warn('live analysis failed:', e); liveFailed = true; }
+    try { live = await liveAnalyze(); } catch (e) { console.warn('live analysis failed:', e); liveFailed = true; liveError = String(e.message || e).slice(0, 220); }
   } else await sleep(300);
   sc.classList.remove('on'); scanMsg('');
-  buildReport(live, liveFailed); renderResult();
+  buildReport(live, liveFailed, liveError); renderResult();
   window.setZoriEmotion?.(live ? 'excited' : (liveFailed ? 'worried' : 'curious'));
   $('#result').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -406,7 +418,7 @@ function pickPair(list) {
   const uniq = list.filter(s => { const d = (s.startTime || '').slice(0, 10); if (!d || seen.has(d)) return false; seen.add(d); return true; });
   return uniq.length >= 2 ? [uniq[0], uniq.at(-1)] : null;
 }
-function buildReport(live, liveFailed) {
+function buildReport(live, liveFailed, liveError = '') {
   const levels = REC[state.change];
   const rec = state.scenes.filter(s => levels.includes(s.processingLevel));
   const withImg = rec.filter(s => browseUrl(s));
@@ -417,7 +429,7 @@ function buildReport(live, liveFailed) {
     const best = Object.values(groups).sort((a, b) => b.length - a.length)[0];
     if (best) pair = pickPair(best);
   }
-  state.report = { rec, withImg, pair, live, liveFailed };
+  state.report = { rec, withImg, pair, live, liveFailed, liveError };
   const shown = pair ? pair : (state.change === 'ground' ? withImg.slice(-4) : withImg.slice(-1));
   whenMapReady(() => drawFootprints(shown.length ? shown : rec.slice(-1)));
 }
@@ -436,7 +448,8 @@ function renderResult() {
   if (!ty || (!state.report && !state.sample) || !state.point) { el.hidden = true; return; }
   // A newly requested scientific analysis takes precedence over the curated NASA case.
   // Otherwise, selecting the Mozambique example hides the real HDF5 result forever.
-  const R = state.report, s = R ? null : state.sample;
+  // The official image remains available if science processing is unavailable.
+  const R = state.report, s = R && R.live ? null : state.sample;
   let title, media = '', extra = '', facts = [];
   if (s) {
     title = s.title[state.lang] || s.title.en;
@@ -444,7 +457,8 @@ function renderResult() {
     if (s.sourceUrl) extra += `<p><a class="btn" href="${esc(s.sourceUrl)}" target="_blank" rel="noopener noreferrer">${esc(t('live.storylink'))}</a></p>`;
     extra += `<p class="note">${esc(t('live.curated'))}</p>`;
     if (s.before && s.after) media = compareHTML(s.before, s.after, t('r.before'), t('r.after'));
-    else if (s.image) media = `<img class="single" src="${esc(s.image)}" alt="${esc(title)}">`;
+    else if (s.image) media = `<figure><img class="single" loading="lazy" src="${esc(s.image)}" alt="${esc(title)}"><figcaption>${esc(t('live.nasaimage'))} · ${esc(s.credit)}</figcaption></figure>`;
+    if (R?.liveFailed) extra += `<p class="scan-error">${esc(t('live.fail'))}${R.liveError ? ' · ' + esc(R.liveError) : ''}</p>`;
   } else {
     title = t('ch.' + ty + '.name');
     const { rec, withImg, pair, live, liveFailed } = R;
@@ -476,7 +490,7 @@ function renderResult() {
       media = `<div class="gallery">${imgs.map(x => `<figure><img class="single" loading="lazy" src="${esc(browseUrl(x))}" alt=""><figcaption>${esc(fmtDate(x.startTime))} · ${esc(x.processingLevel)}</figcaption></figure>`).join('')}</div>`;
       if (ty !== 'ground') extra = `<p class="note">${esc(t('r.one'))}</p>`;
     } else extra = `<p class="note">${esc(t('r.noimg'))}</p>`;
-    if (liveFailed) extra += `<p class="note">${esc(t('live.fail'))}</p>`;
+    if (liveFailed) extra += `<p class="scan-error">${esc(t('live.fail'))}${R.liveError ? ' · ' + esc(R.liveError) : ''}</p>`;
   }
   const p = state.point;
   const vertex = `https://search.asf.alaska.edu/#/?dataset=NISAR&center=${p.lng},${p.lat}&zoom=8`;
@@ -547,15 +561,15 @@ function bind() {
 
   const menu = $('#lang-menu'), lb = $('#lang-btn');
   lb.onclick = e => { e.stopPropagation(); menu.hidden = !menu.hidden; lb.setAttribute('aria-expanded', String(!menu.hidden)); };
-  $$('#lang-menu [data-lang]').forEach(b => { b.onclick = () => { applyLang(b.dataset.lang); menu.hidden = true; }; });
+  $('#lang-menu [data-lang]').forEach(b => { b.onclick = () => { applyLang(b.dataset.lang); menu.hidden = true; window.setZoriEmotion?.('curious'); zoriSay(t('z.language')); }; });
   document.addEventListener('click', () => { menu.hidden = true; lb.setAttribute('aria-expanded', 'false'); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') menu.hidden = true; });
-  $('#theme-toggle').onclick = () => applyTheme(state.theme === 'dark' ? 'light' : 'dark');
+  $('#theme-toggle').onclick = () => { applyTheme(state.theme === 'dark' ? 'light' : 'dark'); window.setZoriEmotion?.('surprised'); zoriSay(t('z.theme')); };
 
   $('#btn-proj').onclick = () => {
     state.projection = state.projection === 'globe' ? 'mercator' : 'globe';
     try { map.setProjection({ type: state.projection }); } catch (e) { console.warn(e); }
-    updateToolLabels();
+    updateToolLabels(); zoriSay(t('z.map'));
   };
   $('#btn-base').onclick = () => { state.base = BASES[(BASES.indexOf(state.base) + 1) % BASES.length]; updateBasemap(); updateToolLabels(); };
   $('#search-form').onsubmit = async e => {
@@ -572,9 +586,9 @@ function bind() {
   $('#d-to').onchange = () => applyRange($('#d-from').value, $('#d-to').value);
   $$('[data-preset]').forEach(b => { b.onclick = () => preset(b.dataset.preset); });
 
-  $('#analyze').onclick = openBriefing;
+  $('#analyze').onclick = () => { window.setZoriEmotion?.('detective'); openBriefing(); };
   $('#b-cancel').onclick = () => $('#briefing').close();
-  $('#b-go').onclick = () => { $('#briefing').close(); runScan(); };
+  $('#b-go').onclick = () => { $('#briefing').close(); window.setZoriEmotion?.('wave'); zoriSay(t('z.scan')); runScan(); };
   $('#copy').onclick = async () => { try { await navigator.clipboard.writeText(location.href); $('#analyze-why').textContent = t('a.copied'); } catch {} };
 
   $('#zori-face').onclick = () => { const a = I18N[state.lang].notes; noteIdx = (noteIdx + 1) % a.length; zoriSay(a[noteIdx]); };
