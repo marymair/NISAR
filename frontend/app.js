@@ -59,7 +59,7 @@ function tickClock() { $('#i-utc').textContent = new Date().toISOString().slice(
 
 /* ---------- language & theme ---------- */
 function applyLang(lang) {
-  state.lang = lang; store.set('zori.lang', lang);
+  state.lang = lang;
   document.documentElement.lang = lang;
   $$('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
   $$('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
@@ -75,7 +75,7 @@ function updateToolLabels() {
   // Basemap control removed: the user chooses only globe or flat projection.
 }
 function applyTheme(th) {
-  state.theme = th; store.set('zori.theme', th);
+  state.theme = th;
   document.documentElement.dataset.theme = th;
   $('#theme-toggle').setAttribute('aria-pressed', String(th === 'light'));
   if (map && mapReady) updateBasemap();
@@ -770,9 +770,10 @@ function bind() {
 function boot() {
   buildLab(); bind(); syncDateInputs();
   tickClock(); setInterval(tickClock, 1000);
-  applyTheme(store.get('zori.theme', document.documentElement.dataset.theme || 'dark'));
-  const nav = (navigator.language || 'en').slice(0, 2);
-  applyLang(store.get('zori.lang', I18N[nav] ? nav : 'en'));
+  // Every new visit starts consistently in English and dark mode, regardless
+  // of browser language or an earlier visit; both controls remain interactive.
+  applyTheme('dark');
+  applyLang('en');
   zoriSay(t('z.hello'));
   const m = location.hash.match(/^#(flood|forest|ground|x)\/(-?[\d.]+)\/(-?[\d.]+)$/);
   if (m) {
