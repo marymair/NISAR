@@ -134,3 +134,45 @@ Object.assign(I18N.es, {
   'a.needPair': 'Se requieren dos escenas GCOV compatibles de fechas distintas (o un interferograma GUNW).',
   'live.imageexpired': 'Imagen no disponible; repite el análisis.'
 });
+
+/* Precomputed NISAR example cards: no remote imagery, no fabricated imagery. */
+Object.assign(I18N.ru, {
+  'case.event': 'Что произошло:', 'case.cause': 'Причина и интерпретация:',
+  'case.satellite': 'Наблюдения NISAR', 'case.archived': 'Предварительно обработано ZORI',
+  'case.scienceSource': 'Источник события и научных данных NASA',
+  'case.notReady': 'Научные снимки ещё не сохранены в архив ZORI. Нельзя показывать неподтверждённые изображения вместо данных спутника.',
+  'case.phase': 'Интерферометрическая фаза GUNW — результат пары наблюдений, не два снимка «до/после».',
+  'case.inspect': 'Исследовать это место',
+  'case.metricGCOV': 'Медиана изменения: {median} дБ · |Δ| ≥ 3 дБ в {fraction}% действительных пикселей. Это не подтверждённая площадь события.',
+  'case.metricGUNW': 'Межквартильный диапазон относительной фазы: {phase} радиан. Это не исправленная карта смещений.'
+});
+Object.assign(I18N.en, {
+  'case.event': 'What happened:', 'case.cause': 'Cause and interpretation:',
+  'case.satellite': 'NISAR observations', 'case.archived': 'Precomputed by ZORI',
+  'case.scienceSource': 'NASA event and science provenance',
+  'case.notReady': 'Real NISAR imagery has not yet been archived for this case. No fabricated or third-party photos are shown.',
+  'case.phase': 'GUNW interferometric phase from paired observations, not a before/after photograph.',
+  'case.inspect': 'Explore this location',
+  'case.metricGCOV': 'Median radar change: {median} dB · |Δ| ≥ 3 dB in {fraction}% of valid pixels. Not a verified event area.',
+  'case.metricGUNW': 'Relative-phase interquartile range: {phase} radians; not corrected ground displacement.'
+});
+Object.assign(I18N.fr, {
+  'case.event': 'Événement :', 'case.cause': 'Cause et interprétation :',
+  'case.satellite': 'Observations NISAR', 'case.archived': 'Calculé par ZORI',
+  'case.scienceSource': 'Source scientifique et événement NASA',
+  'case.notReady': 'Les véritables images NISAR ne sont pas encore archivées pour ce cas.',
+  'case.phase': 'Phase interférométrique GUNW, issue de deux passages, pas des photos avant/après.',
+  'case.inspect': 'Explorer ce lieu',
+  'case.metricGCOV': 'Variation médiane : {median} dB · |Δ| ≥ 3 dB sur {fraction}% des pixels valides. Pas une surface vérifiée.',
+  'case.metricGUNW': 'Écart interquartile de phase relative : {phase} radians.'
+});
+Object.assign(I18N.es, {
+  'case.event': 'Qué ocurrió:', 'case.cause': 'Causa e interpretación:',
+  'case.satellite': 'Observaciones NISAR', 'case.archived': 'Procesado por ZORI',
+  'case.scienceSource': 'Fuente científica NASA',
+  'case.notReady': 'Las imágenes reales NISAR aún no se han archivado para este caso.',
+  'case.phase': 'Fase interferométrica GUNW de dos observaciones, no dos fotos antes/después.',
+  'case.inspect': 'Explorar este lugar',
+  'case.metricGCOV': 'Cambio mediano: {median} dB · |Δ| ≥ 3 dB en {fraction}% de píxeles válidos; no es un área confirmada.',
+  'case.metricGUNW': 'Rango intercuartílico de fase relativa: {phase} radianes.'
+});
