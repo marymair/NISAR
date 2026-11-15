@@ -50,3 +50,19 @@ def test_before_after_slider_has_visible_thumb_and_synced_controls():
     assert "sliders.forEach(slider => slider.addEventListener('input'" in APP
     assert "touch-action: pan-y" in css
     assert "html[data-theme=\"light\"] #result .compare-slider-row" in css
+
+
+def test_precomputed_case_gallery_no_external_image_substitutions():
+    case_js = (ROOT / "frontend/case-data.js").read_text(encoding="utf8")
+    precompute = (ROOT / "tools/precompute_cases.py").read_text(encoding="utf8")
+    assert 'bindCompareSliders($(\'#cases-grid\'))' in APP
+    assert "$$('.compare', root).forEach" in APP
+    assert "$$('.compare img', cmp).forEach" in APP
+    assert "$$('input[type=range]', group)" in APP
+    assert 'case.event' in SCIENCE and 'case.cause' in SCIENCE
+    assert 's.event[state.lang]' in APP and 's.cause[state.lang]' in APP
+    assert 'window.ZORI_CASE_DATA' in case_js
+    assert 'process' not in case_js.lower() or 'precompute' in case_js.lower()
+    assert 'spec["image_kinds"]' in precompute
+    assert 'png.startswith(PNG_HEADER)' in precompute
+    assert 'No NASA illustrations or unverified data were downloaded.' in precompute
