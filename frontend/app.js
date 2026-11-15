@@ -470,6 +470,41 @@ function compareHTML(a, b, la, lb) {
     </div>
   </div>`;
 }
+function bindCompareSliders(root) {
+  $('.compare', root).forEach(cmp => {
+    const group = cmp.closest('.compare-group');
+    if (!group) return;
+    $('.compare img', cmp).forEach(img => {
+      img.onerror = () => {
+        if (!group.isConnected) return;
+        const info = document.createElement('p');
+        info.className = 'scan-error';
+        info.textContent = t('live.imageexpired');
+        group.replaceWith(info);
+      };
+    });
+    const sliders = $('input[type=range]', group);
+    const sync = value => {
+      const pos = Math.max(0, Math.min(100, Number(value) || 0));
+      cmp.style.setProperty('--pos', pos + '%');
+      sliders.forEach(slider => { slider.value = String(pos); });
+    };
+    sliders.forEach(slider => slider.addEventListener('input', e => sync(e.target.value)));
+  });
+}
+function caseMetric(s) {
+  const st = s.stats || {};
+  if (Number.isFinite(st.median_delta_db) && Number.isFinite(st.changed_pixel_fraction)) {
+    return t('case.metricGCOV', {
+      median: st.median_delta_db.toFixed(2),
+      fraction: (100 * st.changed_pixel_fraction).toFixed(1)
+    });
+  }
+  if (Number.isFinite(st.relative_phase_iqr_rad)) {
+    return t('case.metricGUNW', {phase: st.relative_phase_iqr_rad.toFixed(2)});
+  }
+  return '';
+}
 function renderResult() {
   const el = $('#result'); const ty = state.change;
   if (!ty || (!state.report && !state.sample) || !state.point) { el.hidden = true; return; }
@@ -480,11 +515,14 @@ function renderResult() {
   let title, media = '', extra = '', facts = [];
   if (s) {
     title = s.title[state.lang] || s.title.en;
-    extra = `<p>${esc(s.text[state.lang] || s.text.en)}</p><p class="credit">${esc(t('c.credit'))}: ${esc(s.credit)}</p>`;
-    if (s.sourceUrl) extra += `<p><a class="btn" href="${esc(s.sourceUrl)}" target="_blank" rel="noopener noreferrer">${esc(t('live.storylink'))}</a></p>`;
-    extra += `<p class="note">${esc(t('live.curated'))}</p>`;
-    if (s.before && s.after) media = compareHTML(s.before, s.after, t('r.before'), t('r.after'));
-    else if (s.image) media = `<figure><img class="single" loading="lazy" src="${esc(s.image)}" alt="${esc(title)}"><figcaption>${esc(t('live.nasaimage'))} · ${esc(s.credit)}</figcaption></figure>`;
+    extra = `<p><strong>${esc(t('case.event'))}:</strong> ${esc(s.event[state.lang] || s.event.en)}</p><p><strong>${esc(t('case.cause'))}:</strong> ${esc(s.cause[state.lang] || s.cause.en)}</p>`;
+    const metric = caseMetric(s);
+    if (metric) extra += `<p class="case-measure">${esc(metric)}</p>`;
+    if (s.sources?.length) extra += `<p class="credit">${esc(t('case.satellite'))} · ${s.sources.map(x => esc(String(x.date || '').slice(0, 10))).join(' / ')} · ${esc(t('case.archived'))}</p>`;
+    if (s.sourceUrl) extra += `<p class="credit"><a href="${esc(s.sourceUrl)}" target="_blank" rel="noopener noreferrer">${esc(t('case.scienceSource'))}</a></p>`;
+    if (s.before && s.after) media = compareHTML(s.before, s.after, t('r.before'), t('r.after')) + (s.difference ? `<details><summary>${esc(t('r.diff'))}</summary><img class="single" loading="lazy" src="${esc(s.difference)}" alt="${esc(t('r.diff'))}"></details>` : '');
+    else if (s.image) media = `<figure><img class="single" loading="lazy" src="${esc(s.image)}" alt="${esc(t('case.phase'))}"><figcaption>${esc(t('case.phase'))}</figcaption></figure>`;
+    else media = `<p class="scan-error">${esc(t('case.notReady'))}</p>`;
     if (R?.liveFailed) extra += `<p class="scan-error">${esc(t('live.fail'))}${R.liveError ? ' · ' + esc(R.liveError) : ''}</p>`;
   } else {
     title = t('ch.' + ty + '.name');
@@ -544,41 +582,52 @@ function renderResult() {
     </div>`;
   $$('img.single', el).forEach(i => { i.onerror = () => { const n = document.createElement('p'); n.className = 'scan-error'; n.textContent = t('live.imageexpired'); i.replaceWith(n); }; });
   $('#explain-btn', el).onclick = openExplain;
-  const cmp = $('.compare', el);
-  if (cmp) {
-    const group = cmp.closest('.compare-group');
-    $$('.compare img', cmp).forEach(img => {
-      img.onerror = () => {
-        if (!cmp.isConnected) return;
-        const info = document.createElement('p');
-        info.className = 'scan-error';
-        info.textContent = t('live.imageexpired');
-        group.replaceWith(info);
-      };
-    });
-    const sliders = $$('input[type=range]', group);
-    const sync = value => {
-      const pos = Math.max(0, Math.min(100, Number(value) || 0));
-      cmp.style.setProperty('--pos', pos + '%');
-      sliders.forEach(slider => { slider.value = String(pos); });
-    };
-    sliders.forEach(slider => slider.addEventListener('input', e => sync(e.target.value)));
-  }
+  bindCompareSliders(el);
   el.hidden = false;
 }
 
 /* ---------- case studies ---------- */
 function renderCases() {
-  const html = SAMPLES.map(s => `
+  // Small cards on the landing page; full precomputed science panels under "Cases".
+  const intro = SAMPLES.map(s => `
     <button class="card case-card" data-sample="${esc(s.id)}">
       <span class="ico">${ICON[s.type]}</span>
       <h3>${esc(s.title[state.lang] || s.title.en)}</h3>
-      <p>${esc((s.text[state.lang] || s.text.en).slice(0, 120))}…</p>
+      <p>${esc(s.event[state.lang] || s.event.en)}</p>
       <span class="tag">${esc(t('ch.' + s.type + '.name'))}</span>
     </button>`).join('');
-  $('#cases-grid').innerHTML = html;
-  $('#intro-cases').innerHTML = html;
+  $('#intro-cases').innerHTML = intro;
+
+  $('#cases-grid').innerHTML = SAMPLES.map(s => {
+    const title = s.title[state.lang] || s.title.en;
+    const event = s.event[state.lang] || s.event.en;
+    const cause = s.cause[state.lang] || s.cause.en;
+    const image = s.before && s.after
+      ? compareHTML(s.before, s.after, t('r.before'), t('r.after'))
+        + (s.difference ? `<details class="case-diff"><summary>${esc(t('r.diff'))}</summary><img class="single" loading="lazy" src="${esc(s.difference)}" alt="${esc(t('r.diff'))}"></details>` : '')
+      : s.image
+        ? `<figure><img class="single" loading="lazy" src="${esc(s.image)}" alt="${esc(t('case.phase'))}"><figcaption>${esc(t('case.phase'))}</figcaption></figure>`
+        : `<p class="scan-error">${esc(t('case.notReady'))}</p>`;
+    const dates = (s.sources || []).map(v => esc(String(v.date || '').slice(0, 10))).filter(Boolean).join(' → ');
+    return `<article class="card case-card case-feature">
+        <div class="case-media">
+          <span class="case-type">${esc(t('case.archived'))} · NISAR</span>
+          ${image}
+        </div>
+        <div class="case-summary">
+          <h2>${ICON[s.type]} ${esc(title)}</h2>
+          <p><strong>${esc(t('case.event'))}</strong> ${esc(event)}</p>
+          <p><strong>${esc(t('case.cause'))}</strong> ${esc(cause)}</p>
+          ${dates ? `<p class="credit">${esc(t('case.satellite'))}: ${dates}</p>` : ''}
+          ${caseMetric(s) ? `<p class="case-measure">${esc(caseMetric(s))}</p>` : ''}
+          <p class="credit"><a href="${esc(s.sourceUrl)}" target="_blank" rel="noopener noreferrer">${esc(t('case.scienceSource'))}</a></p>
+          <button class="btn primary" type="button" data-sample="${esc(s.id)}">${esc(t('case.inspect'))}</button>
+        </div>
+      </article>`;
+  }).join('');
+  bindCompareSliders($('#cases-grid'));
 }
+
 function openSample(id) {
   const s = SAMPLES.find(x => x.id === id); if (!s) return;
   if ($('#app').hidden) { $('#intro').hidden = true; $('#app').hidden = false; document.body.dataset.screen = 'app'; initMap(); }
