@@ -219,3 +219,16 @@ html[data-theme="light"] #result .unified-science-report .case-summary { color: 
 @media (max-width: 900px) {
   #result .unified-science-report { grid-template-columns: minmax(0, 1fr); }
 }
+
+
+/* Navigation should never display a browser scrollbar over the mission. */
+.nav { scrollbar-width: none; }
+.nav::-webkit-scrollbar { display: none; }
+@media (max-width: 1080px) {
+  body[data-screen="app"] .topbar { flex-wrap: wrap; row-gap: 6px; }
+  body[data-screen="app"] .nav { order: 3; width: 100%; margin-left: 0;
+    overflow-x: visible; flex-wrap: wrap; justify-content: center; }
+  body[data-screen="app"] .nav button { font-size: clamp(.76rem, 2.5vw, .93rem);
+    padding: 8px 10px; white-space: nowrap; }
+  body[data-screen="app"] .controls { margin-left: auto; }
+}
