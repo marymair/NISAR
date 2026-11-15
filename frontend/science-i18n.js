@@ -117,3 +117,20 @@ Object.assign(I18N.es, {
   'z.language': '¡Traductor terrestre actualizado!',
   'z.scan': '¡Radar activado! Buscando ecos NISAR.'
 });
+
+Object.assign(I18N.en, {
+  'a.needPair': 'Two compatible GCOV acquisitions on different dates (or a GUNW interferogram) are needed to run this analysis.',
+  'live.imageexpired': 'An image could not load (the server may have restarted). Run the analysis again.'
+});
+Object.assign(I18N.ru, {
+  'a.needPair': 'Для анализа нужны две совместимые GCOV-сцены за разные даты (или интерферограмма GUNW).',
+  'live.imageexpired': 'Изображение недоступно или сервер перезапускался. Повтори анализ.'
+});
+Object.assign(I18N.fr, {
+  'a.needPair': 'Deux scènes GCOV compatibles à des dates différentes (ou un interférogramme GUNW) sont nécessaires.',
+  'live.imageexpired': 'Image indisponible. Veuillez relancer l’analyse.'
+});
+Object.assign(I18N.es, {
+  'a.needPair': 'Se requieren dos escenas GCOV compatibles de fechas distintas (o un interferograma GUNW).',
+  'live.imageexpired': 'Imagen no disponible; repite el análisis.'
+});
