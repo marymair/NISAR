@@ -7,7 +7,7 @@ already holds private NASA credentials. No Earthdata login/token is needed here.
 This uses only the production ZORI /analyze, /status, and /image APIs, never
 NASA article illustrations. A case is registered only when its scientific
 output and actual PNG bytes pass validation. GCOV produces before/after/change;
-GUNW produces *one* interferometric phase result (not faked before/after).
+GUNW produces *two authentic grids*: phase and measured coherence, not faked before/after.
 
 Example:
   python3 tools/precompute_cases.py
@@ -51,7 +51,7 @@ CASES = {
         "lat": 10.55, "lon": -66.9, "start_date": "2026-06-17",
         "end_date": "2026-07-08", "change": "ground",
         "mode": "gunw_unwrapped_phase",
-        "image_kinds": ("difference",),
+        "image_kinds": ("difference", "coherence"),
     },
 }
 PNG_HEADER = b"\x89PNG\r\n\x1a\n"
